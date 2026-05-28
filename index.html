@@ -20,23 +20,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Prompt', sans-serif; background-color: #faf5ff; } 
-        @keyframes confetti-fall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
-        @keyframes float-avatar {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-4px); }
-        }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+        @keyframes float-avatar { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
         .animate-float-avatar { animation: float-avatar 3.5s ease-in-out infinite; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.8); }
     </style>
 </head>
 <body>
@@ -49,20 +38,16 @@
 
         const { useState, useEffect } = React;
 
-        // ---------------------------------------------------------
-        // 🔥 ตั้งค่า Firebase Database (กุญแจของลูกพี่ myfamilyproject)
-        // ---------------------------------------------------------
         const getFirebaseConfig = () => {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                return JSON.parse(__firebase_config);
-            }
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) return JSON.parse(__firebase_config);
             return {
                 apiKey: "AIzaSyAmQFwL7zniKTnT2INt93iHOlCuT97hC7g",
                 authDomain: "myfamilyproject-ecff4.firebaseapp.com",
                 projectId: "myfamilyproject-ecff4",
                 storageBucket: "myfamilyproject-ecff4.firebasestorage.app",
                 messagingSenderId: "714527535272",
-                appId: "1:714527535272:web:fefa9679e822d31e52529d"
+                appId: "1:714527535272:web:fefa9679e822d31e52529d",
+                measurementId: "G-ED3NCQF2CD"
             };
         };
 
@@ -71,31 +56,18 @@
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'project45_github_app';
 
-        // --- Component ย่อย (Confetti) ---
-        const Confetti = () => {
-            return (
-                <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-                {Array.from({ length: 60 }).map((_, i) => {
-                    const colors = ['#c084fc', '#e879f9', '#f472b6', '#fbbf24', '#f8fafc'];
-                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                    const isCircle = Math.random() > 0.5;
-                    return (
-                    <div key={i} className="absolute top-[-10%]"
-                        style={{
-                        left: `${Math.random() * 100}%`,
-                        width: `${Math.random() * 10 + 5}px`, height: `${Math.random() * 10 + 5}px`,
-                        backgroundColor: randomColor, borderRadius: isCircle ? '50%' : '4px',
-                        animation: `confetti-fall ${Math.random() * 2.5 + 2}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
-                        animationDelay: `${Math.random() * 0.5}s`,
-                        }}
-                    />
-                    );
-                })}
-                </div>
-            );
-        };
+        const Confetti = () => (
+            <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+                {Array.from({ length: 60 }).map((_, i) => (
+                    <div key={i} className="absolute top-[-10%]" style={{
+                        left: `${Math.random() * 100}%`, width: `${Math.random() * 10 + 5}px`, height: `${Math.random() * 10 + 5}px`,
+                        backgroundColor: ['#c084fc', '#e879f9', '#f472b6', '#fbbf24', '#f8fafc'][Math.floor(Math.random() * 5)], borderRadius: Math.random() > 0.5 ? '50%' : '4px',
+                        animation: `confetti-fall ${Math.random() * 2.5 + 2}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`, animationDelay: `${Math.random() * 0.5}s`,
+                    }} />
+                ))}
+            </div>
+        );
 
-        // 👸 ตัวการ์ตูนผู้หญิงแบบใหม่ น่ารัก สดใส
         const CuteGirlAvatar = ({ weight, targetWeight, initialWeight }) => {
             const progress = Math.max(0, Math.min(1, (initialWeight - weight) / (initialWeight - targetWeight)));
             const bodyWidth = 36 - (14 * progress); 
@@ -106,68 +78,36 @@
                     <div className="absolute -top-3 whitespace-nowrap bg-white/95 px-3 py-1 rounded-full text-[10px] font-black text-purple-600 shadow-md border border-purple-100 z-10 transition-all duration-500 transform group-hover:-translate-y-1">
                         {progress >= 1 ? 'สวยปัง หุ่นสับมาก! ✨👸' : progress > 0.6 ? 'สวยขึ้นเยอะเลย! 💖' : progress > 0.3 ? 'สู้ๆ น้าคนเก่ง! 🌸' : 'เริ่มภารกิจคนสวย! 🎀'}
                     </div>
-
                     <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xl transition-transform duration-300">
                         <g className="animate-float-avatar">
-                            {/* ผมด้านหลัง */}
                             <circle cx="50" cy={faceY} r="18" fill="#4a3b32" />
-                            {/* จุกผมสองข้าง */}
                             <circle cx="32" cy={faceY - 8} r="8" fill="#4a3b32" />
                             <circle cx="68" cy={faceY - 8} r="8" fill="#4a3b32" />
-                            {/* ยางรัดผม */}
                             <path d="M 28 20 L 36 28 M 36 20 L 28 28" stroke="#f472b6" strokeWidth="2.5" strokeLinecap="round" />
                             <path d="M 72 20 L 64 28 M 64 20 L 72 28" stroke="#f472b6" strokeWidth="2.5" strokeLinecap="round" />
-
-                            {/* ขา */}
                             <rect x="42" y="65" width="5.5" height="28" rx="2.5" fill="#fbcfe8" />
                             <rect x="52.5" y="65" width="5.5" height="28" rx="2.5" fill="#fbcfe8" />
-                            {/* ถุงเท้า & รองเท้า */}
                             <path d="M 41 85 L 48.5 85 L 48.5 94 Q 45 96 41 94 Z" fill="#ffffff" />
                             <path d="M 51.5 85 L 59 85 L 59 94 Q 55 96 51.5 94 Z" fill="#ffffff" />
                             <rect x="42" y="80" width="5.5" height="5" fill="#e879f9" />
                             <rect x="52.5" y="80" width="5.5" height="5" fill="#e879f9" />
-
-                            {/* ลำตัว (เปลี่ยนความกว้างตามน้ำหนัก) */}
                             <rect x={50 - bodyWidth/2} y="50" width={bodyWidth} height="22" rx="8" fill="#c084fc" className="transition-all duration-700 ease-out" />
-                            {/* ลวดลายเสื้อสปอร์ตบรา */}
                             <path d={`M ${50 - bodyWidth/2} 62 Q 50 68 ${50 + bodyWidth/2} 62`} fill="none" stroke="#e879f9" strokeWidth="2" className="transition-all duration-700 ease-out" />
-
-                            {/* แขน */}
                             <path d={`M ${50 - bodyWidth/2 + 2} 55 Q 35 65 38 75`} fill="none" stroke="#ffe4e1" strokeWidth="5.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
                             <path d={`M ${50 + bodyWidth/2 - 2} 55 Q 65 65 62 75`} fill="none" stroke="#ffe4e1" strokeWidth="5.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
-
-                            {/* คอและหน้า */}
                             <rect x="46" y={faceY + 12} width="8" height="6" fill="#ffe4e1" />
                             <circle cx="50" cy={faceY} r="14.5" fill="#ffe4e1" />
-
-                            {/* ผมม้า */}
                             <path d="M 36 28 Q 50 18 64 28 Q 50 22 36 28" fill="#4a3b32" />
                             <path d="M 37 32 Q 43 20 50 25 Q 45 25 37 32" fill="#4a3b32" />
-
-                            {/* แก้มแดง */}
                             <ellipse cx="41" cy={faceY + 4} rx="3" ry="1.8" fill="#fda4af" opacity="0.8" />
                             <ellipse cx="59" cy={faceY + 4} rx="3" ry="1.8" fill="#fda4af" opacity="0.8" />
-
-                            {/* ตา */}
                             <circle cx="43" cy={faceY} r="2.2" fill="#334155" />
                             <circle cx="57" cy={faceY} r="2.2" fill="#334155" />
                             <circle cx="43.5" cy={faceY - 0.5} r="0.8" fill="#ffffff" />
                             <circle cx="57.5" cy={faceY - 0.5} r="0.8" fill="#ffffff" />
-                            
-                            {/* ปากยิ้ม */}
                             <path d="M 47 36 Q 50 39 53 36" fill="none" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" />
-
-                            {/* สายคาดผม */}
                             <path d="M 36 25 Q 50 18 64 25" fill="none" stroke="#d946ef" strokeWidth="3.5" strokeLinecap="round" />
-
-                            {/* เอฟเฟกต์เหงื่อตก (ตอนยังอวบๆ) */}
-                            {progress < 0.4 && (
-                                <g opacity={1 - progress*2}>
-                                    <path d="M 64 22 Q 66 26 64 28 Q 62 26 64 22 Z" fill="#7dd3fc" />
-                                </g>
-                            )}
-
-                            {/* เอฟเฟกต์ออร่าวิ้งๆ (ตอนผอม) */}
+                            {progress < 0.4 && (<g opacity={1 - progress*2}><path d="M 64 22 Q 66 26 64 28 Q 62 26 64 22 Z" fill="#7dd3fc" /></g>)}
                             {progress >= 0.8 && (
                                 <g className="text-yellow-300" opacity={progress}>
                                     <path d="M 22 25 L 24 30 L 29 32 L 24 34 L 22 39 L 20 34 L 15 32 L 20 30 Z" fill="currentColor" className="animate-pulse"/>
@@ -181,20 +121,13 @@
             );
         };
 
-        // --- หน้า Login ---
         const LoginScreen = ({ onLogin }) => {
             const [name, setName] = useState('');
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (name.trim()) onLogin(name.trim());
-            };
-
+            const handleSubmit = (e) => { e.preventDefault(); if (name.trim()) onLogin(name.trim()); };
             return (
                 <div className="min-h-screen bg-gradient-to-br from-fuchsia-100 via-purple-100 to-pink-100 flex items-center justify-center p-6 text-slate-800 relative overflow-hidden">
                     <div className="absolute top-10 left-10 w-48 h-48 bg-purple-300 rounded-full blur-[80px] opacity-40"></div>
                     <div className="absolute bottom-10 right-10 w-48 h-48 bg-pink-300 rounded-full blur-[80px] opacity-40"></div>
-                    
                     <div className="glass-card p-8 rounded-[36px] shadow-[0_20px_60px_rgba(192,132,252,0.15)] w-full max-w-sm text-center relative z-10">
                         <div className="text-6xl mb-4 animate-bounce drop-shadow-md">🎀</div>
                         <h1 className="text-2xl font-black text-purple-700 mb-2">Welcome to Club!</h1>
@@ -202,26 +135,20 @@
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-purple-300 text-lg">🌸</span>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="ใส่ชื่อของคุณ (เช่น: Pattama)"
-                                    className="w-full bg-white/80 border-2 border-purple-100 rounded-[20px] pl-12 pr-4 py-4 text-sm font-bold text-purple-900 focus:outline-none focus:border-purple-400 focus:bg-white transition-colors placeholder:text-purple-300/80 shadow-inner"
-                                />
+                                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="ใส่ชื่อของคุณ (เช่น: Pattama)" className="w-full bg-white/80 border-2 border-purple-100 rounded-[20px] pl-12 pr-4 py-4 text-sm font-bold text-purple-900 focus:outline-none focus:border-purple-400 focus:bg-white transition-colors placeholder:text-purple-300/80 shadow-inner" />
                             </div>
-                            <button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black text-sm py-4 rounded-[20px] shadow-lg shadow-purple-300/50 active:scale-95 transition-all">
-                                เริ่มภารกิจคนสวย! 🚀
-                            </button>
+                            <button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black text-sm py-4 rounded-[20px] shadow-lg shadow-purple-300/50 active:scale-95 transition-all">เริ่มภารกิจคนสวย! 🚀</button>
                         </form>
                     </div>
                 </div>
             );
         }
 
-        // --- หน้า Dashboard หลัก ที่ผูกกับ Firestore ---
         const Dashboard = ({ user, profileName, onLogout }) => {
-            const localCacheKey = `p45_cache_${profileName}`;
+            const normalizedProfileName = profileName.trim().toLowerCase();
+            const displayProfileName = profileName.trim().charAt(0).toUpperCase() + profileName.trim().slice(1).toLowerCase();
+            const localCacheKey = `p45_data_${normalizedProfileName}`;
+            
             const cachedDataStr = window.localStorage.getItem(localCacheKey);
             const cachedData = cachedDataStr ? JSON.parse(cachedDataStr) : null;
 
@@ -242,61 +169,47 @@
             };
 
             const [dailyData, setDailyData] = useState(() => {
-                if (cachedData?.records && cachedData.records[dateString]) {
-                    return cachedData.records[dateString];
-                }
+                if (cachedData?.records && cachedData.records[dateString]) return cachedData.records[dateString];
                 return defaultDailyData;
             });
             
-            const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', profileName);
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', normalizedProfileName);
 
-            // ระบบซิงค์ข้อมูลคลาวด์
             useEffect(() => {
                 if (!user) return;
-
-                const timeoutId = setTimeout(() => {
-                    setLoadingData(false);
-                }, 2000);
+                const timeoutId = setTimeout(() => setLoadingData(false), 2000);
 
                 const unsubscribe = onSnapshot(docRef, (docSnap) => {
                     clearTimeout(timeoutId); 
-
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        
                         window.localStorage.setItem(localCacheKey, JSON.stringify(data));
-
                         if (data.weight) setWeight(data.weight);
                         if (data.records) setAllRecords(data.records); 
-                        
                         if (data.records && data.records[dateString]) {
                             setDailyData(data.records[dateString]);
                         } else {
                             setDailyData(defaultDailyData);
                         }
                     } else {
-                        setDoc(docRef, { weight: 52.0, records: {} }, { merge: true });
+                        const dataToSave = cachedData || { weight: 52.0, records: {} };
+                        setDoc(docRef, dataToSave, { merge: true });
                     }
                     setLoadingData(false);
                 }, (error) => {
-                    console.error("Cloud connection error", error);
+                    console.error("Cloud Error", error);
                     setLoadingData(false);
                 });
 
-                return () => {
-                    clearTimeout(timeoutId);
-                    unsubscribe();
-                };
-            }, [user.uid, profileName, dateString]);
+                return () => { clearTimeout(timeoutId); unsubscribe(); };
+            }, [user.uid, normalizedProfileName, dateString]);
 
             const updateDaily = (key, value) => {
                 const newData = { ...dailyData, [key]: value };
                 setDailyData(newData); 
-
                 const newRecords = { ...allRecords, [dateString]: newData };
                 setAllRecords(newRecords);
                 window.localStorage.setItem(localCacheKey, JSON.stringify({ weight, records: newRecords }));
-
                 setDoc(docRef, { records: { [dateString]: newData } }, { merge: true });
             };
 
@@ -313,7 +226,6 @@
             
             const todayOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const todayStr = new Date().toLocaleDateString('th-TH', todayOptions);
-
             const planStartDate = new Date(2026, 5, 1); 
             const diffTime = new Date().getTime() - planStartDate.getTime();
             const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1); 
@@ -336,84 +248,43 @@
                 ]
             };
 
-            const convenienceStoreIdeas = [
-                { type: 'เช้า', item: 'แซนวิชโฮลวีตทูน่า + อเมริกาโน่ไม่หวาน' }, 
-                { type: 'เช้า', item: 'กล้วยหอม 1 ลูก + ไข่ตุ๋นคัพ' },
-                { type: 'เที่ยง', item: 'ข้าวกล้อง + ปลาซาบะย่าง (สูตรโซเดียมต่ำ)' }, 
-                { type: 'เที่ยง', item: 'เกี๊ยวกุ้งน้ำ (ไม่ซดน้ำซุป) + นมโปรตีนสูง' },
-                { type: 'ว่าง', item: 'กรีกโยเกิร์ต (รสธรรมชาติ) + ถั่วแระญี่ปุ่น' }, 
-                { type: 'เย็น', item: 'ยำวุ้นเส้น (สำเร็จรูป) + อกไก่ฉีก' },
-            ];
-
-            const waterSchedule = [
-                { time: '07:00 - 08:00', desc: 'หลังตื่นนอน (กระตุ้นระบบขับถ่าย)', amount: 2, ml: 500 },
-                { time: '10:00 - 12:00', desc: 'ช่วงสายถึงเที่ยง (ลดความหิว)', amount: 2, ml: 500 },
-                { time: '14:00 - 16:00', desc: 'ช่วงบ่าย (เติมความสดชื่น ผิวสวย)', amount: 2, ml: 500 },
-                { time: '18:00 - 20:00', desc: 'มื้อเย็นถึงก่อนนอน (จิบเบาๆ)', amount: 2, ml: 500 },
-            ];
+            const convenienceStoreIdeas = [ { type: 'เช้า', item: 'แซนวิชโฮลวีตทูน่า + อเมริกาโน่ไม่หวาน' }, { type: 'เช้า', item: 'กล้วยหอม 1 ลูก + ไข่ตุ๋นคัพ' }, { type: 'เที่ยง', item: 'ข้าวกล้อง + ปลาซาบะย่าง (สูตรโซเดียมต่ำ)' }, { type: 'เที่ยง', item: 'เกี๊ยวกุ้งน้ำ (ไม่ซดน้ำซุป) + นมโปรตีนสูง' }, { type: 'ว่าง', item: 'กรีกโยเกิร์ต (รสธรรมชาติ) + ถั่วแระญี่ปุ่น' }, { type: 'เย็น', item: 'ยำวุ้นเส้น (สำเร็จรูป) + อกไก่ฉีก' } ];
+            const waterSchedule = [ { time: '07:00 - 08:00', desc: 'ตื่นนอน (กระตุ้นขับถ่าย)', amount: 2, ml: 500 }, { time: '10:00 - 12:00', desc: 'สายถึงเที่ยง (ลดหิว)', amount: 2, ml: 500 }, { time: '14:00 - 16:00', desc: 'บ่าย (เติมความสดชื่น ผิวสวย)', amount: 2, ml: 500 }, { time: '18:00 - 20:00', desc: 'ก่อนนอน (จิบเบาๆ)', amount: 2, ml: 500 } ];
 
             const [mealsOpen, setMealsOpen] = useState(true);
             const [proteinOpen, setProteinOpen] = useState(true);
             const [waterOpen, setWaterOpen] = useState(true);
             const [exOpen, setExOpen] = useState(true);
 
-            useEffect(() => {
-                const allDone = dailyData.breakfastDone && dailyData.lunchDone && dailyData.snackDone && dailyData.dinnerDone;
-                setMealsOpen(!allDone);
-            }, [dailyData.breakfastDone, dailyData.lunchDone, dailyData.snackDone, dailyData.dinnerDone]);
-
+            useEffect(() => { const allDone = dailyData.breakfastDone && dailyData.lunchDone && dailyData.snackDone && dailyData.dinnerDone; setMealsOpen(!allDone); }, [dailyData.breakfastDone, dailyData.lunchDone, dailyData.snackDone, dailyData.dinnerDone]);
             useEffect(() => { setProteinOpen(dailyData.protein < targetProtein); }, [dailyData.protein]);
             useEffect(() => { setWaterOpen(dailyData.water < targetWater); }, [dailyData.water]);
-            useEffect(() => {
-                const completedEx = dailyData.exerciseChecks.filter(Boolean).length;
-                setExOpen(completedEx < dailyPlan.exercises.length);
-            }, [dailyData.exerciseChecks]);
+            useEffect(() => { const completedEx = dailyData.exerciseChecks.filter(Boolean).length; setExOpen(completedEx < dailyPlan.exercises.length); }, [dailyData.exerciseChecks]);
 
-            // อัปเกรดระบบคะแนน: ถอด IF ออกจาก 100% แล้วเพิ่มคะแนนให้หมวดออกกำลังกาย
             const computeScoreForRecord = (rec) => {
                 if (!rec) return 0;
                 let s = 0;
-                if (rec.breakfastDone) s += 5;
-                if (rec.lunchDone) s += 5;
-                if (rec.snackDone) s += 5;
-                if (rec.dinnerDone) s += 5;
+                if (rec.breakfastDone) s += 5; if (rec.lunchDone) s += 5; if (rec.snackDone) s += 5; if (rec.dinnerDone) s += 5;
                 if (rec.water >= targetWater) s += 20;
                 if (rec.protein >= targetProtein) s += 20;
-                
                 const exCount = (rec.exerciseChecks || []).filter(Boolean).length;
-                // ให้คะแนนออกกำลังกายท่าละ 10 คะแนน (รวม 4 ท่า = 40 คะแนน)
                 s += (exCount / 4) * 40; 
-                
                 return Math.min(Math.round(s), 100);
             };
 
-            const last7Days = Array.from({length: 7}, (_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - 6 + i);
-                return d.toDateString();
-            });
+            const last7Days = Array.from({length: 7}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); return d.toDateString(); });
 
-            // คำนวณคะแนนรวมวันนี้
             let dailyScore = 0;
-            if (dailyData.breakfastDone) dailyScore += 5;
-            if (dailyData.lunchDone) dailyScore += 5;
-            if (dailyData.snackDone) dailyScore += 5;
-            if (dailyData.dinnerDone) dailyScore += 5;
+            if (dailyData.breakfastDone) dailyScore += 5; if (dailyData.lunchDone) dailyScore += 5; if (dailyData.snackDone) dailyScore += 5; if (dailyData.dinnerDone) dailyScore += 5;
             if (dailyData.water >= targetWater) dailyScore += 20;
             if (dailyData.protein >= targetProtein) dailyScore += 20;
-            
             const completedExercises = dailyData.exerciseChecks.filter(Boolean).length;
-            // ให้คะแนนออกกำลังกาย 40 Pts (จากเดิม 20 Pts)
             dailyScore += (completedExercises / dailyPlan.exercises.length) * 40; 
-            
             dailyScore = Math.min(Math.round(dailyScore), 100);
 
             useEffect(() => {
-                if (dailyScore === 100) {
-                    setShowConfetti(true);
-                    const timer = setTimeout(() => setShowConfetti(false), 5000);
-                    return () => clearTimeout(timer);
-                } else setShowConfetti(false);
+                if (dailyScore === 100) { setShowConfetti(true); const timer = setTimeout(() => setShowConfetti(false), 5000); return () => clearTimeout(timer); }
+                else setShowConfetti(false);
             }, [dailyScore]);
 
             const getMotivationalMessage = () => {
@@ -423,19 +294,14 @@
                 return "มาเริ่มดูแลตัวเองกันเถอะ! 🌸";
             };
 
-            const rewardsList = [
-                "ส้มตำแซ่บๆ 1 จาน (สั่งลดหวาน/เค็มลงนิดนึงเพื่อสุขภาพ)", "ทุเรียนพูเล็กๆ 1 พู (ให้พอชื่นใจ)", "แซลมอนซาชิมิฟินๆ 1 ชุด",
-                "ก๋วยเตี๋ยวชามโปรด 1 ชาม (อร่อยได้แต่งดซดน้ำซุปเยอะน้า)", "จิ้มจุ่มมื้อเย็นฟินๆ (เน้นผักและเนื้อสัตว์ไม่ติดมัน)",
-                "ผลไม้สดแช่เย็นฉ่ำๆ (แตงโม หรือ ชมพู่)", "เมี่ยงปลาเผาตัวโตๆ (เน้นกินผักเยอะๆ)", "เงาะ หรือ มะขามหวาน พอให้หายอยาก",
-                "อาหารอีสาน 1 อย่างที่อยากกิน (เช่น น้ำตกหมู หรือ ลาบ)", "ฝรั่ง มะละกอ หรือ พุทรา กรอบๆ เย็นๆ"
-            ];
+            const rewardsList = ["ส้มตำแซ่บๆ 1 จาน (สั่งลดหวาน/เค็มลงนิดนึง)", "ทุเรียนพูเล็กๆ 1 พู (ให้พอชื่นใจ)", "แซลมอนซาชิมิฟินๆ 1 ชุด", "ก๋วยเตี๋ยวชามโปรด 1 ชาม (งดซดน้ำซุปเยอะน้า)", "จิ้มจุ่มมื้อเย็นฟินๆ (เน้นผัก/เนื้อไม่ติดมัน)", "ผลไม้สดแช่เย็นฉ่ำๆ (แตงโม/ชมพู่)", "เมี่ยงปลาเผาตัวโตๆ (เน้นกินผักเยอะๆ)", "เงาะ หรือ มะขามหวาน พอให้หายอยาก", "อาหารอีสาน 1 อย่างที่ชอบ (เช่น น้ำตกหมู)", "ฝรั่ง มะละกอ หรือ พุทรา กรอบๆ เย็นๆ"];
             const todayReward = rewardsList[diffDays % rewardsList.length];
 
             if (loadingData) {
                 return (
                     <div className="min-h-screen flex flex-col items-center justify-center text-purple-400 bg-[#faf5ff]">
                         <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4"></div>
-                        <p className="font-bold text-sm">กำลังเตรียมคลับคนสวย... 🌸</p>
+                        <p className="font-bold text-sm">กำลังซิงค์ข้อมูลให้คนสวย... 🌸</p>
                     </div>
                 );
             }
@@ -444,48 +310,33 @@
                 <div className="min-h-screen text-slate-700 pb-24 selection:bg-purple-200 animation-fade-in font-sans">
                     {showConfetti && <Confetti />}
 
-                    {/* Header Banner - สไตล์น่ารักละมุนๆ */}
                     <header className="relative bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500 pt-12 pb-20 px-6 rounded-b-[40px] shadow-lg overflow-hidden text-white z-10">
                         <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white opacity-10 rounded-full blur-[40px]"></div>
                         <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-pink-300 opacity-20 rounded-full blur-[40px]"></div>
-                        
                         <div className="relative z-10">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
-                                    <p className="text-pink-100 font-bold text-[10px] tracking-[0.2em] uppercase mb-1 drop-shadow-sm flex items-center gap-1">
-                                        <span className="text-yellow-300">✨</span> Flexible Fit & Firm
-                                    </p>
+                                    <p className="text-pink-100 font-bold text-[10px] tracking-[0.2em] uppercase mb-1 drop-shadow-sm flex items-center gap-1"><span className="text-yellow-300">✨</span> Flexible Fit & Firm</p>
                                     <h1 className="text-4xl font-black tracking-tight leading-none mb-1 drop-shadow-md">Project <span className="text-pink-200">45</span></h1>
                                     <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mt-2">
-                                        <span className="text-sm">👋</span>
-                                        <h2 className="text-xs font-bold text-white tracking-wide">Hi, {profileName}!</h2>
+                                        <span className="text-sm">👋</span><h2 className="text-xs font-bold text-white tracking-wide">Hi, {displayProfileName}!</h2>
                                     </div>
                                 </div>
                                 <button onClick={onLogout} className="bg-white/20 hover:bg-white/30 p-2.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20 flex flex-col items-center transition-colors">
-                                    <span className="text-xl">🚪</span>
-                                    <span className="text-[8px] font-bold mt-1 uppercase tracking-wider text-pink-50">ออกระบบ</span>
+                                    <span className="text-xl">🚪</span><span className="text-[8px] font-bold mt-1 uppercase tracking-wider text-pink-50">ออกระบบ</span>
                                 </button>
                             </div>
                         </div>
                     </header>
 
-                    {/* Floating Content */}
                     <div className="px-5 -mt-12 relative z-20 space-y-5">
-                        
-                        {/* Avatar & Target Card */}
                         <div className="glass-card rounded-[32px] p-5 shadow-[0_8px_30px_rgb(192,132,252,0.12)] border border-white flex flex-col relative overflow-hidden bg-white/60">
                             <div className="absolute right-[-10%] top-[-10%] w-32 h-32 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full blur-2xl opacity-60"></div>
                             <div className="flex items-center justify-between gap-2 relative z-10">
                                 <div className="flex flex-col shrink-0">
                                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-purple-400 mb-1 flex items-center gap-1">🎯 เป้าหมาย: 45.0 kg</span>
                                     <div className="flex items-baseline gap-1 mt-1">
-                                        <input 
-                                            type="number" 
-                                            step="0.1" 
-                                            value={weight} 
-                                            onChange={(e) => updateWeightToCloud(parseFloat(e.target.value) || 0)}
-                                            className="w-24 bg-transparent text-5xl font-black text-slate-800 tracking-tighter outline-none border-b-2 border-dashed border-purple-200 focus:border-purple-500 transition-colors"
-                                        />
+                                        <input type="number" step="0.1" value={weight} onChange={(e) => updateWeightToCloud(parseFloat(e.target.value) || 0)} className="w-24 bg-transparent text-5xl font-black text-slate-800 tracking-tighter outline-none border-b-2 border-dashed border-purple-200 focus:border-purple-500 transition-colors" />
                                     </div>
                                     <div className="flex gap-2 mt-4">
                                         <button onClick={() => updateWeightToCloud(Number((weight + 0.1).toFixed(1)))} className="w-10 h-10 bg-white rounded-[12px] text-purple-400 font-black text-xl shadow-sm border border-purple-50 active:scale-95 transition-all hover:bg-purple-50">+</button>
@@ -496,7 +347,6 @@
                             </div>
                         </div>
 
-                        {/* Progress Bar */}
                         <div className="bg-white rounded-[24px] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-50">
                             <div className="flex justify-between items-center mb-3">
                                 <h3 className="font-bold text-slate-700 text-xs flex items-center gap-1.5"><span className="text-lg">🗓️</span> วันที่ {diffDays > 0 ? diffDays : '0'} / 60</h3>
@@ -509,25 +359,17 @@
                         </div>
                     </div>
 
-                    {/* Tabs แบบใหม่ โค้งมน */}
                     <div className="px-5 mt-4">
                         <div className="flex bg-white/50 p-1.5 rounded-[20px] backdrop-blur-md shadow-sm border border-purple-100">
-                            <button onClick={() => setActiveTab('tracker')} className={`flex-1 py-3 px-2 rounded-[16px] font-bold text-[11px] transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'tracker' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-purple-400'}`}>
-                                💖 ภารกิจวันนี้
-                            </button>
-                            <button onClick={() => setActiveTab('plan')} className={`flex-1 py-3 px-2 rounded-[16px] font-bold text-[11px] transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'plan' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-purple-400'}`}>
-                                📝 แผนเสบียง
-                            </button>
-                            <button onClick={() => setActiveTab('stats')} className={`flex-1 py-3 px-2 rounded-[16px] font-bold text-[11px] transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'stats' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-purple-400'}`}>
-                                📊 สถิติความปัง
-                            </button>
+                            <button onClick={() => setActiveTab('tracker')} className={`flex-1 py-3 px-2 rounded-[16px] font-bold text-[11px] transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'tracker' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-purple-400'}`}>💖 ภารกิจวันนี้</button>
+                            <button onClick={() => setActiveTab('plan')} className={`flex-1 py-3 px-2 rounded-[16px] font-bold text-[11px] transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'plan' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-purple-400'}`}>📝 แผนเสบียง</button>
+                            <button onClick={() => setActiveTab('stats')} className={`flex-1 py-3 px-2 rounded-[16px] font-bold text-[11px] transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'stats' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-purple-400'}`}>📊 สถิติความปัง</button>
                         </div>
                     </div>
                     
                     <main className="px-5 mt-6 space-y-5">
                         {activeTab === 'tracker' ? (
                             <>
-                                {/* พลังงานวันนี้ (Score) */}
                                 <section className={`rounded-[32px] p-6 flex items-center justify-between relative overflow-hidden transition-colors duration-500 shadow-md ${dailyScore === 100 ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none' : 'bg-white border border-purple-50 text-slate-800'}`}>
                                     <div className="relative z-10 max-w-[65%]">
                                         <h2 className={`font-black text-xl mb-1 ${dailyScore === 100 ? 'text-white' : 'text-purple-700'}`}>คะแนนความสวย ✨</h2>
@@ -542,7 +384,6 @@
                                     </div>
                                 </section>
 
-                                {/* กล่องของขวัญ */}
                                 <section className={`rounded-[24px] p-5 shadow-sm border transition-all duration-500 ${dailyScore === 100 ? 'bg-gradient-to-r from-fuchsia-50 to-pink-50 border-pink-200' : 'bg-white border-slate-100'}`}>
                                     <div className="flex items-center gap-4">
                                         <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0 text-2xl transition-all ${dailyScore === 100 ? 'bg-pink-500 text-white shadow-lg shadow-pink-200 scale-110' : 'bg-slate-50 text-slate-300'}`}>🎁</div>
@@ -553,7 +394,6 @@
                                     </div>
                                 </section>
 
-                                {/* วินัยการกิน */}
                                 <section className="bg-white rounded-[28px] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-50 transition-all duration-500">
                                     <div className="flex items-center justify-between cursor-pointer" onClick={() => setMealsOpen(!mealsOpen)}>
                                         <h2 className="font-black text-slate-700 flex items-center gap-2 text-sm"><span className="text-xl">🥗</span> วินัยการกิน (20 Pts)</h2>
@@ -584,7 +424,6 @@
                                     )}
                                 </section>
 
-                                {/* สะสมโปรตีน */}
                                 <section className="bg-white rounded-[28px] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-50 relative overflow-hidden mt-2 transition-all duration-500">
                                     <div className="absolute bottom-0 left-0 right-0 bg-pink-50/80 transition-all duration-700 -z-0" style={{ height: `${Math.min((dailyData.protein/targetProtein)*100, 100)}%` }}></div>
                                     <div className="relative z-10">
@@ -610,7 +449,6 @@
                                     </div>
                                 </section>
 
-                                {/* เติมน้ำ */}
                                 <section className="bg-white rounded-[28px] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-50 relative overflow-hidden mt-2 transition-all duration-500">
                                     <div className="absolute bottom-0 left-0 right-0 bg-blue-50/80 transition-all duration-700 -z-0" style={{ height: `${Math.min((dailyData.water/targetWater)*100, 100)}%` }}></div>
                                     <div className="relative z-10">
@@ -627,7 +465,6 @@
                                                 <div className="text-5xl transition-all duration-500" style={{ filter: dailyData.water >= targetWater ? 'drop-shadow(0px 4px 10px rgba(96, 165, 250, 0.4))' : 'grayscale(1)' }}>💧</div>
                                                 <button onClick={() => updateDaily('water', dailyData.water + 1)} className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 text-white text-xl font-bold active:scale-95 shadow-md shadow-blue-200">+</button>
                                             </div>
-                                            
                                             <div className="mt-4 pt-4 border-t border-slate-100">
                                                 <h3 className="text-[11px] font-bold text-slate-500 mb-3 text-center">ตารางดื่มน้ำให้ครบ 2 ลิตร/วัน (แก้วละ ~250 ml)</h3>
                                                 <div className="space-y-2">
@@ -649,7 +486,6 @@
                                     </div>
                                 </section>
 
-                                {/* ขยับร่างกาย (อัปเกรดเป็น 40 Pts) */}
                                 <section className="bg-white rounded-[28px] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-50 mt-2 transition-all duration-500">
                                     <div className="flex items-center justify-between cursor-pointer" onClick={() => setExOpen(!exOpen)}>
                                         <div>
@@ -687,7 +523,6 @@
                                     )}
                                 </section>
 
-                                {/* IF และ ปวดเข่า (IF เป็นแค่โบนัส ไม่นับคะแนน) */}
                                 <section className="grid grid-cols-2 gap-4 my-4 pb-4">
                                     <div onClick={() => updateDaily('fastingSuccess', !dailyData.fastingSuccess)} className={`p-5 rounded-[28px] border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between active:scale-95 ${dailyData.fastingSuccess ? 'border-indigo-400 bg-indigo-50 shadow-md shadow-indigo-100/50' : 'border-transparent bg-white shadow-sm border-slate-100 hover:border-indigo-200'}`}>
                                         <div className="flex items-center justify-between mb-3">
@@ -724,73 +559,44 @@
                                         <div className="bg-pink-50 text-pink-500 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-pink-100">Convenience Mode</div>
                                     </div>
                                     <div className="space-y-6 relative ml-4 z-10">
-                                        {/* เส้นเชื่อม Timeline */}
                                         <div className="absolute left-[13px] top-4 bottom-4 w-0.5 bg-purple-100 -z-10 rounded-full"></div>
-                                        {[
-                                            { time: '10:00', meal: 'มื้อเช้า', desc: dailyPlan.meals.breakfast, icon: '🥞', color: 'fuchsia' },
-                                            { time: '13:00', meal: 'มื้อเที่ยง', desc: dailyPlan.meals.lunch, icon: '🍱', color: 'purple' },
-                                            { time: '16:00', meal: 'มื้อว่าง', desc: dailyPlan.meals.snack, icon: '🧁', color: 'pink' },
-                                            { time: '18:30', meal: 'มื้อเย็น', desc: dailyPlan.meals.dinner, icon: '🍲', color: 'violet' }
-                                        ].map((item, idx) => (
+                                        {[ { time: '10:00', meal: 'มื้อเช้า', desc: dailyPlan.meals.breakfast, icon: '🥞', color: 'fuchsia' }, { time: '13:00', meal: 'มื้อเที่ยง', desc: dailyPlan.meals.lunch, icon: '🍱', color: 'purple' }, { time: '16:00', meal: 'มื้อว่าง', desc: dailyPlan.meals.snack, icon: '🧁', color: 'pink' }, { time: '18:30', meal: 'มื้อเย็น', desc: dailyPlan.meals.dinner, icon: '🍲', color: 'violet' } ].map((item, idx) => (
                                             <div key={idx} className="flex gap-5 items-start relative">
                                                 <div className={`w-7 h-7 rounded-full border-[3px] border-white bg-${item.color}-200 flex items-center justify-center shrink-0 shadow-sm mt-1 -ml-[3px] text-sm`}>{item.icon}</div>
                                                 <div className="bg-slate-50 p-4 rounded-[20px] flex-1 border border-slate-100 shadow-sm">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-${item.color}-100 text-${item.color}-600`}>{item.time}</span>
-                                                        <h3 className="font-extrabold text-slate-700 text-sm">{item.meal}</h3>
-                                                    </div>
+                                                    <div className="flex items-center gap-2 mb-2"><span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-${item.color}-100 text-${item.color}-600`}>{item.time}</span><h3 className="font-extrabold text-slate-700 text-sm">{item.meal}</h3></div>
                                                     <p className="text-[12px] font-medium text-slate-500 leading-relaxed">{item.desc}</p>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                    
                                     <div className="mt-8 pt-6 border-t border-slate-100 relative z-10">
-                                        <h3 className="font-black text-purple-500 text-[11px] uppercase tracking-wide mb-3 flex items-center gap-1.5">
-                                            <span className="bg-purple-100 p-1.5 rounded-lg text-sm">🏪</span> ไอเดียเมนูร้านสะดวกซื้อ
-                                        </h3>
+                                        <h3 className="font-black text-purple-500 text-[11px] uppercase tracking-wide mb-3 flex items-center gap-1.5"><span className="bg-purple-100 p-1.5 rounded-lg text-sm">🏪</span> ไอเดียเมนูร้านสะดวกซื้อ</h3>
                                         <div className="grid grid-cols-1 gap-2.5">
                                             {convenienceStoreIdeas.map((idea, idx) => (
                                                 <div key={idx} className="flex items-center gap-3 text-[11px] text-slate-500 bg-white p-3 rounded-[16px] border border-slate-100 shadow-sm">
-                                                    <span className="font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-lg shrink-0 text-[9px] uppercase tracking-wider">{idea.type}</span>
-                                                    <span className="font-medium leading-snug">{idea.item}</span>
+                                                    <span className="font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-lg shrink-0 text-[9px] uppercase tracking-wider">{idea.type}</span><span className="font-medium leading-snug">{idea.item}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 </section>
-
                                 <section className="bg-gradient-to-br from-purple-800 to-fuchsia-900 rounded-[32px] p-7 shadow-lg border border-purple-700/50 mb-10 text-white relative overflow-hidden">
-                                    {/* รูปทรงเรขาคณิตพื้นหลัง */}
                                     <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-white opacity-10 rounded-full blur-[30px]"></div>
                                     <div className="absolute bottom-[-10%] left-[-10%] w-32 h-32 bg-pink-400 opacity-20 rounded-full blur-[30px]"></div>
-                                    
                                     <div className="relative z-10">
-                                        <div className="mb-6">
-                                            <h2 className="font-black text-xl text-white flex items-center gap-2 drop-shadow-md">💃 ขยับร่างกายวันนี้</h2>
-                                            <div className="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mt-2">
-                                                <p className="text-[10px] font-bold text-pink-100 uppercase tracking-widest">{dailyPlan.type}</p>
-                                            </div>
-                                        </div>
+                                        <div className="mb-6"><h2 className="font-black text-xl text-white flex items-center gap-2 drop-shadow-md">💃 ขยับร่างกายวันนี้</h2><div className="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mt-2"><p className="text-[10px] font-bold text-pink-100 uppercase tracking-widest">{dailyPlan.type}</p></div></div>
                                         <div className="space-y-3">
                                             {dailyPlan.exercises.map((ex, idx) => {
                                                 const isDone = dailyData.exerciseChecks[idx];
                                                 return (
                                                 <div key={idx} className={`flex items-center gap-4 p-4 rounded-[20px] transition-all border ${isDone ? 'bg-white/20 border-white/30 shadow-inner' : 'bg-black/20 border-white/10 shadow-sm'}`}>
-                                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-black shadow-sm transition-colors ${isDone ? 'bg-white text-purple-600' : 'bg-white/10 text-white/50'}`}>
-                                                        {isDone ? '✓' : idx + 1}
-                                                    </div>
-                                                    <div>
-                                                        <span className={`text-sm font-bold transition-all block leading-tight ${isDone ? 'text-pink-200 line-through decoration-pink-300/50' : 'text-white'}`}>{ex.title}</span>
-                                                        <span className={`text-[10px] mt-1.5 block ${isDone ? 'text-white/60' : 'text-purple-200'}`}>🎯 {ex.focus} — {ex.detail}</span>
-                                                    </div>
+                                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-black shadow-sm transition-colors ${isDone ? 'bg-white text-purple-600' : 'bg-white/10 text-white/50'}`}>{isDone ? '✓' : idx + 1}</div>
+                                                    <div><span className={`text-sm font-bold transition-all block leading-tight ${isDone ? 'text-pink-200 line-through decoration-pink-300/50' : 'text-white'}`}>{ex.title}</span><span className={`text-[10px] mt-1.5 block ${isDone ? 'text-white/60' : 'text-purple-200'}`}>🎯 {ex.focus} — {ex.detail}</span></div>
                                                 </div>
                                             )})}
                                         </div>
-                                        <div className="mt-6 p-4 bg-black/20 rounded-[20px] text-[11px] font-medium text-pink-100 flex items-start gap-3 border border-white/10 leading-relaxed backdrop-blur-sm">
-                                            <span className="text-xl">🥺</span>
-                                            <p>ทำท่าละ 40 วินาที พัก 20 วินาที ทำวนให้ครบ 4 รอบ <strong className="text-white block mt-1">ระวัง! หากเจ็บแปล๊บที่เข่าให้หยุดทำทันทีนะคะ</strong></p>
-                                        </div>
+                                        <div className="mt-6 p-4 bg-black/20 rounded-[20px] text-[11px] font-medium text-pink-100 flex items-start gap-3 border border-white/10 leading-relaxed backdrop-blur-sm"><span className="text-xl">🥺</span><p>ทำท่าละ 40 วินาที พัก 20 วินาที ทำวนให้ครบ 4 รอบ <strong className="text-white block mt-1">ระวัง! หากเจ็บแปล๊บที่เข่าให้หยุดทำทันทีนะคะ</strong></p></div>
                                     </div>
                                 </section>
                             </div>
@@ -799,7 +605,6 @@
                                 <section className="bg-white rounded-[32px] p-6 shadow-sm border border-purple-50">
                                     <h2 className="font-black text-lg text-purple-900 mb-1 flex items-center gap-2">📊 สถิติความปัง 7 วันย้อนหลัง</h2>
                                     <p className="text-[11px] text-slate-400 mb-6 font-medium">ดูกราฟคะแนนความมีวินัยของตัวเองกันค่ะ</p>
-                                    
                                     <div className="flex items-end justify-between h-48 gap-2.5 pt-4 border-t border-slate-100">
                                         {last7Days.map((dateStr, i) => {
                                             const rec = allRecords[dateStr];
@@ -807,9 +612,7 @@
                                             const dayObj = new Date(dateStr);
                                             const dayName = dayObj.toLocaleDateString('th-TH', {weekday: 'short'});
                                             const isToday = dateStr === dateString;
-                                            
                                             const finalScore = isToday ? dailyScore : score;
-                                            
                                             return (
                                                 <div key={dateStr} className="flex flex-col items-center flex-1 gap-2 h-full">
                                                     <span className={`text-[10px] font-black ${finalScore === 100 ? 'text-pink-500' : 'text-purple-400'}`}>{finalScore}%</span>
@@ -822,7 +625,6 @@
                                         })}
                                     </div>
                                 </section>
-
                                 <section className="bg-white rounded-[32px] p-6 shadow-sm border border-purple-50">
                                     <h2 className="font-black text-[11px] text-slate-400 uppercase tracking-widest mb-4">🏆 สรุปภาพรวมหุ่นสวย</h2>
                                     <div className="grid grid-cols-2 gap-4">
@@ -851,35 +653,22 @@
             useEffect(() => {
                 const initAuth = async () => {
                     try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Auth error", error);
-                    }
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                        else await signInAnonymously(auth);
+                    } catch (error) { console.error("Auth error", error); }
                 };
                 initAuth();
-
-                const unsubscribe = onAuthStateChanged(auth, (u) => {
-                    setUser(u);
-                    setAuthLoading(false);
-                });
+                const unsubscribe = onAuthStateChanged(auth, (u) => { setUser(u); setAuthLoading(false); });
                 return () => unsubscribe();
             }, []);
 
-            const handleLogin = (name) => {
-                setCurrentUser(name);
-                window.localStorage.setItem('p45_current_profile', name);
+            const handleLogin = (name) => { 
+                const safeName = name.trim().toLowerCase(); 
+                setCurrentUser(safeName); window.localStorage.setItem('p45_current_profile', safeName); 
             };
+            const handleLogout = () => { setCurrentUser(null); window.localStorage.removeItem('p45_current_profile'); };
 
-            const handleLogout = () => {
-                setCurrentUser(null);
-                window.localStorage.removeItem('p45_current_profile');
-            };
-
-            if (authLoading) return <div className="min-h-screen bg-[#faf5ff] flex flex-col items-center justify-center text-purple-400"><div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4"></div><p className="font-bold text-sm">กำลังเชื่อมต่อคลาวด์... ☁️</p></div>;
+            if (authLoading) return <div className="min-h-screen bg-[#faf5ff] flex flex-col items-center justify-center text-purple-400"><div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4"></div><p className="font-bold text-sm">กำลังซิงค์ข้อมูลให้คนสวย... 🌸</p></div>;
             if (!user || !currentUser) return <LoginScreen onLogin={handleLogin} />;
 
             return <Dashboard user={user} profileName={currentUser} onLogout={handleLogout} />;
