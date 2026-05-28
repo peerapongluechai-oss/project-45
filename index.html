@@ -250,6 +250,7 @@
             
             const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', profileName);
 
+            // ระบบซิงค์ข้อมูลคลาวด์
             useEffect(() => {
                 if (!user) return;
 
@@ -368,6 +369,7 @@
                 setExOpen(completedEx < dailyPlan.exercises.length);
             }, [dailyData.exerciseChecks]);
 
+            // อัปเกรดระบบคะแนน: ถอด IF ออกจาก 100% แล้วเพิ่มคะแนนให้หมวดออกกำลังกาย
             const computeScoreForRecord = (rec) => {
                 if (!rec) return 0;
                 let s = 0;
@@ -377,9 +379,11 @@
                 if (rec.dinnerDone) s += 5;
                 if (rec.water >= targetWater) s += 20;
                 if (rec.protein >= targetProtein) s += 20;
+                
                 const exCount = (rec.exerciseChecks || []).filter(Boolean).length;
-                s += (exCount / 4) * 20;
-                if (rec.fastingSuccess) s += 20;
+                // ให้คะแนนออกกำลังกายท่าละ 10 คะแนน (รวม 4 ท่า = 40 คะแนน)
+                s += (exCount / 4) * 40; 
+                
                 return Math.min(Math.round(s), 100);
             };
 
@@ -389,6 +393,7 @@
                 return d.toDateString();
             });
 
+            // คำนวณคะแนนรวมวันนี้
             let dailyScore = 0;
             if (dailyData.breakfastDone) dailyScore += 5;
             if (dailyData.lunchDone) dailyScore += 5;
@@ -398,8 +403,9 @@
             if (dailyData.protein >= targetProtein) dailyScore += 20;
             
             const completedExercises = dailyData.exerciseChecks.filter(Boolean).length;
-            dailyScore += (completedExercises / dailyPlan.exercises.length) * 20;
-            if (dailyData.fastingSuccess) dailyScore += 20;
+            // ให้คะแนนออกกำลังกาย 40 Pts (จากเดิม 20 Pts)
+            dailyScore += (completedExercises / dailyPlan.exercises.length) * 40; 
+            
             dailyScore = Math.min(Math.round(dailyScore), 100);
 
             useEffect(() => {
@@ -643,11 +649,11 @@
                                     </div>
                                 </section>
 
-                                {/* ขยับร่างกาย */}
+                                {/* ขยับร่างกาย (อัปเกรดเป็น 40 Pts) */}
                                 <section className="bg-white rounded-[28px] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-50 mt-2 transition-all duration-500">
                                     <div className="flex items-center justify-between cursor-pointer" onClick={() => setExOpen(!exOpen)}>
                                         <div>
-                                            <h2 className="font-black text-slate-700 flex items-center gap-2 text-sm"><span className="text-xl">💃</span> ขยับร่างกาย (20 Pts)</h2>
+                                            <h2 className="font-black text-slate-700 flex items-center gap-2 text-sm"><span className="text-xl">💃</span> ขยับร่างกาย (40 Pts)</h2>
                                             <p className="text-[10px] text-purple-500 font-bold mt-1 ml-8">เป้าหมาย: ลดต้นแขน & หน้าท้อง</p>
                                         </div>
                                         <div className="bg-slate-50 px-3 py-1 rounded-full text-[10px] font-bold text-slate-400">{exOpen ? 'ซ่อน' : 'เปิด'}</div>
@@ -681,7 +687,7 @@
                                     )}
                                 </section>
 
-                                {/* IF และ ปวดเข่า */}
+                                {/* IF และ ปวดเข่า (IF เป็นแค่โบนัส ไม่นับคะแนน) */}
                                 <section className="grid grid-cols-2 gap-4 my-4 pb-4">
                                     <div onClick={() => updateDaily('fastingSuccess', !dailyData.fastingSuccess)} className={`p-5 rounded-[28px] border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between active:scale-95 ${dailyData.fastingSuccess ? 'border-indigo-400 bg-indigo-50 shadow-md shadow-indigo-100/50' : 'border-transparent bg-white shadow-sm border-slate-100 hover:border-indigo-200'}`}>
                                         <div className="flex items-center justify-between mb-3">
@@ -692,7 +698,7 @@
                                         </div>
                                         <div>
                                             <h3 className={`font-extrabold text-sm ${dailyData.fastingSuccess ? 'text-indigo-700' : 'text-slate-700'}`}>งดมื้อดึก (IF)</h3>
-                                            <p className="text-[10px] text-slate-400 font-bold mt-1">20 Pts • หลัง 19:00 น.</p>
+                                            <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">โบนัสวินัย • หลัง 19:00 น.</p>
                                         </div>
                                     </div>
 
@@ -755,6 +761,7 @@
                                 </section>
 
                                 <section className="bg-gradient-to-br from-purple-800 to-fuchsia-900 rounded-[32px] p-7 shadow-lg border border-purple-700/50 mb-10 text-white relative overflow-hidden">
+                                    {/* รูปทรงเรขาคณิตพื้นหลัง */}
                                     <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-white opacity-10 rounded-full blur-[30px]"></div>
                                     <div className="absolute bottom-[-10%] left-[-10%] w-32 h-32 bg-pink-400 opacity-20 rounded-full blur-[30px]"></div>
                                     
