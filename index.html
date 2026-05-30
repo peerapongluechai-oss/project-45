@@ -1,831 +1,763 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Project 45: Flexible Fit & Firm</title>
+import React, { useState, useEffect } from 'react';
+import { 
+  Activity, 
+  Utensils, 
+  Droplet, 
+  CheckCircle, 
+  Moon, 
+  Flame,
+  ThumbsUp,
+  AlertCircle,
+  Calendar,
+  BookOpen,
+  Coffee,
+  Sun,
+  Sunset,
+  Trophy,
+  Target,
+  Scale,
+  Gift,
+  Star
+} from 'lucide-react';
 
-    <!-- PWA: โค้ดทำแอปเต็มจอมือถือ -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#faf5ff">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👸</text></svg>">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👸</text></svg>">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #faf5ff; } 
-        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
-        @keyframes float-avatar { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
-        .animate-float-avatar { animation: float-avatar 3.5s ease-in-out infinite; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.8); }
+// --- Component พลุเฉลิมฉลอง (ธีมม่วง-ชมพู) ---
+const Confetti = () => {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+      {Array.from({ length: 50 }).map((_, i) => {
+        const colors = ['#a855f7', '#d946ef', '#ec4899', '#8b5cf6', '#eab308', '#f472b6'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const isCircle = Math.random() > 0.5;
         
-        /* สั่นกล่องของขวัญ */
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-4px) rotate(-3deg); } 20%, 40%, 60%, 80% { transform: translateX(4px) rotate(3deg); } }
-        .animate-shake { animation: shake 0.5s ease-in-out; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
-
-    <script type="text/babel" data-type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const { useState, useEffect } = React;
-
-        const getFirebaseConfig = () => {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) return JSON.parse(__firebase_config);
-            return {
-                apiKey: "AIzaSyAmQFwL7zniKTnT2INt93iHOlCuT97hC7g",
-                authDomain: "myfamilyproject-ecff4.firebaseapp.com",
-                projectId: "myfamilyproject-ecff4",
-                storageBucket: "myfamilyproject-ecff4.firebasestorage.app",
-                messagingSenderId: "714527535272",
-                appId: "1:714527535272:web:fefa9679e822d31e52529d"
-            };
-        };
-
-        const app = initializeApp(getFirebaseConfig());
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'project45_github_app';
-
-        const Confetti = () => (
-            <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-                {Array.from({ length: 60 }).map((_, i) => (
-                    <div key={i} className="absolute top-[-10%]" style={{
-                        left: `${Math.random() * 100}%`, width: `${Math.random() * 10 + 5}px`, height: `${Math.random() * 10 + 5}px`,
-                        backgroundColor: ['#c084fc', '#e879f9', '#f472b6', '#fbbf24', '#f8fafc'][Math.floor(Math.random() * 5)], borderRadius: Math.random() > 0.5 ? '50%' : '4px',
-                        animation: `confetti-fall ${Math.random() * 2.5 + 2}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`, animationDelay: `${Math.random() * 0.5}s`,
-                    }} />
-                ))}
-            </div>
+        return (
+          <div
+            key={i}
+            className="absolute top-[-10%]"
+            style={{
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 10 + 5}px`,
+              height: `${Math.random() * 10 + 5}px`,
+              backgroundColor: randomColor,
+              borderRadius: isCircle ? '50%' : '4px',
+              animation: `confetti-fall ${Math.random() * 2.5 + 1.5}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+              animationDelay: `${Math.random() * 0.5}s`,
+            }}
+          />
         );
+      })}
+    </div>
+  );
+};
 
-        const CuteGirlAvatar = ({ weight, targetWeight, initialWeight }) => {
-            const progress = Math.max(0, Math.min(1, (initialWeight - weight) / (initialWeight - targetWeight)));
-            const bodyWidth = 36 - (14 * progress); 
-            const faceY = 32;
-            const isPhase2 = progress >= 0.5 && progress < 1;
-            const isPhase3 = progress >= 1; 
+// --- Component ตัวการ์ตูนผู้หญิง (แบบเคลื่อนไหวตามวัน) ---
+const TransformationAvatar = ({ weight, targetWeight, initialWeight, dayIndex }) => {
+  const progress = Math.max(0, Math.min(1, (initialWeight - weight) / (initialWeight - targetWeight)));
+  const bodyRx = 30 - (16 * progress);
+  const faceY = 26;
 
-            return (
-                <div className="relative w-32 h-32 flex items-center justify-center mx-2 group">
-                    <div className="absolute -top-3 whitespace-nowrap bg-white/95 px-3 py-1.5 rounded-full text-xs font-black text-purple-600 shadow-md border border-purple-100 z-10 transition-all duration-500 transform group-hover:-translate-y-1">
-                        {isPhase3 ? 'สวยปัง เจ้าหญิงมาเอง! 👑' : isPhase2 ? 'หุ่นเริ่มสับแล้ว! 👗' : 'เริ่มภารกิจคนสวย! 🎀'}
-                    </div>
-                    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xl transition-transform duration-300">
-                        <g className="animate-float-avatar">
-                            <circle cx="50" cy={faceY} r="18" fill="#4a3b32" />
-                            {isPhase3 ? (
-                                <path d="M 32 30 Q 50 60 68 30 Z" fill="#4a3b32" />
-                            ) : (
-                                <g>
-                                    <circle cx="32" cy={faceY - 8} r="8" fill="#4a3b32" />
-                                    <circle cx="68" cy={faceY - 8} r="8" fill="#4a3b32" />
-                                    <path d="M 28 20 L 36 28 M 36 20 L 28 28" stroke="#f472b6" strokeWidth="2.5" strokeLinecap="round" />
-                                    <path d="M 72 20 L 64 28 M 64 20 L 72 28" stroke="#f472b6" strokeWidth="2.5" strokeLinecap="round" />
-                                </g>
-                            )}
-                            <rect x="42" y="65" width="5.5" height="28" rx="2.5" fill="#fbcfe8" />
-                            <rect x="52.5" y="65" width="5.5" height="28" rx="2.5" fill="#fbcfe8" />
-                            {isPhase3 ? (
-                                <g>
-                                    <path d="M 42 88 L 47.5 94 L 41 94 Z" fill="#f472b6" />
-                                    <path d="M 52.5 88 L 58 94 L 51.5 94 Z" fill="#f472b6" />
-                                </g>
-                            ) : (
-                                <g>
-                                    <path d="M 41 85 L 48.5 85 L 48.5 94 Q 45 96 41 94 Z" fill="#ffffff" />
-                                    <path d="M 51.5 85 L 59 85 L 59 94 Q 55 96 51.5 94 Z" fill="#ffffff" />
-                                    <rect x="42" y="80" width="5.5" height="5" fill="#e879f9" />
-                                    <rect x="52.5" y="80" width="5.5" height="5" fill="#e879f9" />
-                                </g>
-                            )}
-                            {isPhase3 ? (
-                                <path d={`M 41 38 L 59 38 L ${50 + bodyWidth} 75 L ${50 - bodyWidth} 75 Z`} fill="#f472b6" className="transition-all duration-700 ease-out" />
-                            ) : isPhase2 ? (
-                                <g>
-                                    <rect x={50 - bodyWidth/2} y="50" width={bodyWidth} height="10" rx="3" fill="#c084fc" className="transition-all duration-700 ease-out" />
-                                    <rect x={50 - bodyWidth/2} y="64" width={bodyWidth} height="8" rx="2" fill="#334155" className="transition-all duration-700 ease-out" />
-                                </g>
-                            ) : (
-                                <g>
-                                    <rect x={50 - bodyWidth/2} y="50" width={bodyWidth} height="22" rx="8" fill="#c084fc" className="transition-all duration-700 ease-out" />
-                                    <path d={`M ${50 - bodyWidth/2} 62 Q 50 68 ${50 + bodyWidth/2} 62`} fill="none" stroke="#e879f9" strokeWidth="2" className="transition-all duration-700 ease-out" />
-                                </g>
-                            )}
-                            <path d={`M ${50 - bodyWidth/2 + 2} 55 Q 35 65 38 75`} fill="none" stroke="#ffe4e1" strokeWidth="5.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
-                            <path d={`M ${50 + bodyWidth/2 - 2} 55 Q 65 65 62 75`} fill="none" stroke="#ffe4e1" strokeWidth="5.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
-                            <rect x="46" y={faceY + 12} width="8" height="6" fill="#ffe4e1" />
-                            <circle cx="50" cy={faceY} r="14.5" fill="#ffe4e1" />
-                            <path d="M 36 28 Q 50 18 64 28 Q 50 22 36 28" fill="#4a3b32" />
-                            <path d="M 37 32 Q 43 20 50 25 Q 45 25 37 32" fill="#4a3b32" />
-                            <ellipse cx="41" cy={faceY + 4} rx="3" ry="1.8" fill="#fda4af" opacity="0.8" />
-                            <ellipse cx="59" cy={faceY + 4} rx="3" ry="1.8" fill="#fda4af" opacity="0.8" />
-                            <circle cx="43" cy={faceY} r="2.2" fill="#334155" />
-                            <circle cx="57" cy={faceY} r="2.2" fill="#334155" />
-                            <circle cx="43.5" cy={faceY - 0.5} r="0.8" fill="#ffffff" />
-                            <circle cx="57.5" cy={faceY - 0.5} r="0.8" fill="#ffffff" />
-                            <path d="M 47 36 Q 50 39 53 36" fill="none" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" />
-                            {isPhase3 && <path d="M 40 16 L 43 10 L 50 14 L 57 10 L 60 16 Z" fill="#fbbf24" />}
-                            {progress >= 0.8 && (
-                                <g className="text-yellow-300" opacity={progress}>
-                                    <path d="M 22 25 L 24 30 L 29 32 L 24 34 L 22 39 L 20 34 L 15 32 L 20 30 Z" fill="currentColor" className="animate-pulse"/>
-                                    <path d="M 78 45 L 79 48 L 82 49 L 79 50 L 78 53 L 77 50 L 74 49 L 77 48 Z" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.5s'}}/>
-                                </g>
-                            )}
-                        </g>
-                    </svg>
-                </div>
-            );
-        };
+  // กำหนดกิจกรรมตามวันในสัปดาห์: 0=อา, 1=จ, 2=อ, 3=พ, 4=พฤ, 5=ศ, 6=ส
+  // เพื่อให้ตรงกับแผนการซ้อม: จ,พ,ศ = คาดิโอ | อ,พฤ = เวท | ส,อา = ยืดเหยียด
+  const activities = ['stretch', 'cardio', 'strength', 'cardio', 'strength', 'cardio', 'stretch'];
+  const act = activities[dayIndex % 7] || 'idle';
 
-        const LoginScreen = ({ onLogin }) => {
-            const [name, setName] = useState('');
-            const handleSubmit = (e) => { e.preventDefault(); if (name.trim()) onLogin(name.trim()); };
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-fuchsia-100 via-purple-100 to-pink-100 flex items-center justify-center p-6 text-slate-800 relative overflow-hidden">
-                    <div className="absolute top-10 left-10 w-48 h-48 bg-purple-300 rounded-full blur-[80px] opacity-40"></div>
-                    <div className="absolute bottom-10 right-10 w-48 h-48 bg-pink-300 rounded-full blur-[80px] opacity-40"></div>
-                    <div className="glass-card p-8 rounded-[36px] shadow-[0_20px_60px_rgba(192,132,252,0.15)] w-full max-w-sm text-center relative z-10">
-                        <div className="text-6xl mb-4 animate-bounce drop-shadow-md">🎀</div>
-                        <h1 className="text-3xl font-black text-purple-700 mb-2">Welcome to Club!</h1>
-                        <p className="text-sm text-slate-600 mb-8 font-medium">กรอกชื่อเพื่อเข้าสู่คลับลดน้ำหนักส่วนตัว<br/>ระบบเชื่อมต่อ Cloud ให้เรียบร้อยแล้วค่ะ ✨</p>
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                            <div className="relative">
-                                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-purple-300 text-xl">🌸</span>
-                                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="ใส่ชื่อของคุณ (เช่น: Pattama)" className="w-full bg-white/80 border-2 border-purple-100 rounded-[20px] pl-12 pr-4 py-4 text-base font-bold text-purple-900 focus:outline-none focus:border-purple-400 focus:bg-white transition-colors placeholder:text-purple-300/80 shadow-inner" />
-                            </div>
-                            <button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black text-base py-4 rounded-[20px] shadow-lg shadow-purple-300/50 active:scale-95 transition-all">เริ่มภารกิจคนสวย! 🚀</button>
-                        </form>
-                    </div>
-                </div>
-            );
+  // ข้อความให้กำลังใจเปลี่ยนตามกิจกรรม
+  let statusText = '';
+  if (progress >= 1) statusText = 'หุ่นปังแล้ว! 🎉';
+  else if (act === 'cardio') statusText = 'คาดิโอสู้ๆ! 🏃‍♀️';
+  else if (act === 'strength') statusText = 'เวทเทรนนิ่ง! 💪';
+  else if (act === 'stretch') statusText = 'วันพักยืดเหยียด 🧘‍♀️';
+
+  return (
+    <div className="relative w-28 h-28 flex items-center justify-center mx-2 group">
+      {/* ป้ายข้อความ */}
+      <div className="absolute -top-4 whitespace-nowrap bg-white/95 px-3 py-1 rounded-full text-[10px] font-black text-purple-600 shadow-md border border-purple-100 z-20 transition-all duration-500 animate-bounce">
+        {statusText}
+      </div>
+
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
+        <style>{`
+          /* จุดหมุนข้อต่อต่างๆ */
+          .origin-hip-l { transform-origin: 43px 65px; }
+          .origin-hip-r { transform-origin: 57px 65px; }
+          .origin-shoulder-l { transform-origin: 45px 42px; }
+          .origin-shoulder-r { transform-origin: 55px 42px; }
+          .origin-bottom { transform-origin: 50px 85px; }
+
+          /* แอนิเมชันลอยตัวพื้นฐาน */
+          @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+          
+          /* แอนิเมชันสำหรับวัน Cardio (วิ่งย่ำเท้า) */
+          @keyframes run-leg-l { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(-10deg); } }
+          @keyframes run-leg-r { 0%, 100% { transform: translateY(-8px) rotate(-10deg); } 50% { transform: translateY(0px) rotate(0deg); } }
+          @keyframes run-arm-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(40deg); } }
+          @keyframes run-arm-r { 0%, 100% { transform: rotate(40deg); } 50% { transform: rotate(0deg); } }
+          
+          /* แอนิเมชันสำหรับวัน Strength (ยกดัมเบล) */
+          @keyframes curl-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(100deg); } }
+          @keyframes curl-r { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-100deg); } }
+
+          /* แอนิเมชันสำหรับวัน Stretch (ยืดตัวโยกซ้ายขวา) */
+          @keyframes sway { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+
+          /* นำแอนิเมชันไปใช้กับคลาส */
+          .anim-float { animation: float 3s ease-in-out infinite; }
+          
+          .anim-run-leg-l { animation: run-leg-l 0.6s infinite; }
+          .anim-run-leg-r { animation: run-leg-r 0.6s infinite; }
+          .anim-run-arm-l { animation: run-arm-l 0.6s infinite; }
+          .anim-run-arm-r { animation: run-arm-r 0.6s infinite; }
+
+          .anim-curl-l { animation: curl-l 1.5s ease-in-out infinite; }
+          .anim-curl-r { animation: curl-r 1.5s ease-in-out infinite; }
+
+          .anim-sway { animation: sway 4s ease-in-out infinite; }
+        `}</style>
+        
+        {/* กลุ่มร่างกายทั้งหมด */}
+        <g className={`anim-float ${act === 'stretch' ? 'anim-sway origin-bottom' : ''}`}>
+          
+          {/* ผมด้านหลัง */}
+          <path d="M 36 26 C 20 40, 30 70, 40 75 C 50 78, 60 78, 60 75 C 70 70, 80 40, 64 26 Z" fill="#3f271d" />
+
+          {/* ขาซ้าย */}
+          <g className={`origin-hip-l ${act === 'cardio' ? 'anim-run-leg-l' : ''}`}>
+            <line x1="43" y1="65" x2="43" y2="85" stroke="#fcd5ce" strokeWidth="4.5" strokeLinecap="round" />
+            <ellipse cx="41" cy="86" rx="5" ry="3.5" fill="#c084fc" />
+          </g>
+          {/* ขาขวา */}
+          <g className={`origin-hip-r ${act === 'cardio' ? 'anim-run-leg-r' : ''}`}>
+            <line x1="57" y1="65" x2="57" y2="85" stroke="#fcd5ce" strokeWidth="4.5" strokeLinecap="round" />
+            <ellipse cx="59" cy="86" rx="5" ry="3.5" fill="#c084fc" />
+          </g>
+
+          {/* แขนซ้าย (วาดก่อนชุดเดรสเพื่อให้อยู่ด้านหลังลำตัว) */}
+          <g className={`origin-shoulder-l ${act === 'cardio' ? 'anim-run-arm-l' : act === 'strength' ? 'anim-curl-l' : ''}`}>
+            {act === 'stretch' ? (
+              // ท่ายืดแขนชูขึ้น
+              <line x1="45" y1="42" x2="35" y2="15" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" />
+            ) : (
+              // ท่าแขนแนบลำตัวปกติ
+              <line x1="45" y1="42" x2={50 - bodyRx - 3} y2="58" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" className="transition-all duration-700 ease-out" />
+            )}
+            {/* ดัมเบลที่มือซ้าย */}
+            {act === 'strength' && (
+              <g transform={`translate(${50 - bodyRx - 3}, 58)`}>
+                <line x1="-4" y1="0" x2="4" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+                <circle cx="-4" cy="0" r="3" fill="#ec4899" />
+                <circle cx="4" cy="0" r="3" fill="#ec4899" />
+              </g>
+            )}
+          </g>
+
+          {/* ชุดเดรสทรงเอ สีม่วง */}
+          <path d={`M 41 38 L 59 38 L ${50 + bodyRx} 68 Q 50 72 ${50 - bodyRx} 68 Z`} fill="#a855f7" className="transition-all duration-700 ease-out" />
+          {/* ลายคาดเอวเดรส */}
+          <path d={`M ${50 - bodyRx*0.65} 48 Q 50 51 ${50 + bodyRx*0.65} 48`} fill="none" stroke="#7e22ce" strokeWidth="2.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
+
+          {/* แขนขวา (วาดหลังชุดเดรสเพื่อให้อยู่ด้านหน้าลำตัว) */}
+          <g className={`origin-shoulder-r ${act === 'cardio' ? 'anim-run-arm-r' : act === 'strength' ? 'anim-curl-r' : ''}`}>
+            {act === 'stretch' ? (
+              // ท่ายืดแขนชูขึ้น
+              <line x1="55" y1="42" x2="65" y2="15" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" />
+            ) : (
+              // ท่าแขนแนบลำตัวปกติ
+              <line x1="55" y1="42" x2={50 + bodyRx + 3} y2="58" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" className="transition-all duration-700 ease-out" />
+            )}
+            {/* ดัมเบลที่มือขวา */}
+            {act === 'strength' && (
+              <g transform={`translate(${50 + bodyRx + 3}, 58)`}>
+                <line x1="-4" y1="0" x2="4" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+                <circle cx="-4" cy="0" r="3" fill="#ec4899" />
+                <circle cx="4" cy="0" r="3" fill="#ec4899" />
+              </g>
+            )}
+          </g>
+
+          {/* ศีรษะและใบหน้า */}
+          <circle cx="50" cy={faceY} r="14" fill="#fcd5ce" />
+          <path d="M 35 25 Q 50 5 65 25 Q 50 15 35 25" fill="#3f271d" />
+          <path d="M 36 28 Q 40 18 52 18 Q 45 22 36 28" fill="#5c3a21" />
+          
+          {/* โบว์ติดผม */}
+          <path d="M 62 10 L 68 5 L 67 14 Z" fill="#e879f9" />
+          <path d="M 62 10 L 56 5 L 57 14 Z" fill="#e879f9" />
+          <circle cx="62" cy="10" r="2.5" fill="#d946ef" />
+
+          {/* แก้ม */}
+          <circle cx="42" cy={faceY + 4} r="3" fill="#ffa6c9" opacity="0.8" />
+          <circle cx="58" cy={faceY + 4} r="3" fill="#ffa6c9" opacity="0.8" />
+
+          {/* ดวงตาเปลี่ยนตามการออกกำลังกาย */}
+          {act === 'strength' || act === 'cardio' ? (
+             // หลับตาปี๋เหนื่อย/ตั้งใจ
+             <g>
+                <path d="M 42 27 Q 44 26 46 27" fill="none" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M 54 27 Q 56 26 58 27" fill="none" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" />
+             </g>
+          ) : (
+             // ตาแป๋วปกติ
+             <g>
+                <circle cx="44" cy={faceY + 1} r="2.5" fill="#1e293b" />
+                <circle cx="56" cy={faceY + 1} r="2.5" fill="#1e293b" />
+                <circle cx="44.5" cy={faceY} r="1" fill="#ffffff" />
+                <circle cx="56.5" cy={faceY} r="1" fill="#ffffff" />
+             </g>
+          )}
+
+          {/* ปากเปลี่ยนตามการออกกำลังกาย */}
+          {act === 'strength' ? (
+            // ปากกัดฟันสู้ (เส้นตรง)
+            <line x1="48" y1="32" x2="52" y2="32" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" />
+          ) : act === 'cardio' ? (
+            // อ้าปากหอบเหนื่อย
+            <circle cx="50" cy="32" r="1.5" fill="#7e22ce" />
+          ) : (
+            // ยิ้มสวยๆ
+            <path d="M 48 31 Q 50 33 52 31" fill="none" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" />
+          )}
+
+          {/* เอฟเฟกต์พิเศษเมื่อเป้าหมายสำเร็จ */}
+          {progress >= 1 && (
+            <g>
+              <path d="M 47 30 Q 50 35 53 30" fill="#a855f7" stroke="#7e22ce" strokeWidth="1" strokeLinecap="round" />
+              <g className="text-yellow-400">
+                <path d="M 28 15 L 30 20 L 35 22 L 30 24 L 28 29 L 26 24 L 21 22 L 26 20 Z" fill="currentColor" />
+                <path d="M 75 45 L 76 48 L 79 49 L 76 50 L 75 53 L 74 50 L 71 49 L 74 48 Z" fill="currentColor" />
+              </g>
+            </g>
+          )}
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('tracker'); 
+  const [weight, setWeight] = useState(52.0);
+  const [water, setWater] = useState(0);
+  
+  const [breakfastDone, setBreakfastDone] = useState(false);
+  const [lunchDone, setLunchDone] = useState(false);
+  const [snackDone, setSnackDone] = useState(false);
+  const [dinnerDone, setDinnerDone] = useState(false);
+  const [exerciseChecks, setExerciseChecks] = useState([false, false, false, false]);
+  const [fastingSuccess, setFastingSuccess] = useState(false);
+  const [kneePain, setKneePain] = useState(null); 
+  
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const targetWater = 8;
+  const targetWeight = 45.0;
+  const initialWeight = 52.0;
+
+  // หาวันที่และดัชนีวันในสัปดาห์ปัจจุบัน
+  const today = new Date();
+  const dayIndex = today.getDay(); // 0 = วันอาทิตย์, 1 = วันจันทร์, ...
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const dateString = today.toLocaleDateString('th-TH', options);
+
+  const planStartDate = new Date(2026, 4, 27); 
+  const diffTime = today.getTime() - planStartDate.getTime();
+  const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1); 
+  const totalDays = 60; 
+  const overallProgress = Math.min(Math.round((diffDays / totalDays) * 100), 100);
+
+  // ระบบเตือนวันชั่งน้ำหนัก
+  const weighInFrequency = 7; 
+  const currentCycleDay = diffDays > 0 ? (diffDays - 1) % weighInFrequency : 0;
+  const isWeighInDay = currentCycleDay === 0 && diffDays > 0;
+  const daysUntilNextWeighIn = diffDays > 0 ? weighInFrequency - currentCycleDay : Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+  
+  const nextWeighInDate = new Date(today);
+  if (diffDays <= 0) {
+      nextWeighInDate.setTime(planStartDate.getTime());
+  } else if (!isWeighInDay) {
+      nextWeighInDate.setDate(today.getDate() + daysUntilNextWeighIn);
+  }
+  const nextWeighInString = nextWeighInDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+
+  const toggleExercise = (index) => {
+    const newChecks = [...exerciseChecks];
+    newChecks[index] = !newChecks[index];
+    setExerciseChecks(newChecks);
+  };
+
+  // คำนวณคะแนน
+  let dailyScore = 0;
+  if (breakfastDone) dailyScore += 10;
+  if (lunchDone) dailyScore += 10;
+  if (snackDone) dailyScore += 10;
+  if (dinnerDone) dailyScore += 10;
+  if (water >= targetWater) dailyScore += 20;
+  
+  const completedExercises = exerciseChecks.filter(Boolean).length;
+  dailyScore += (completedExercises / 4) * 20;
+  if (fastingSuccess) dailyScore += 20;
+  dailyScore = Math.min(Math.round(dailyScore), 100);
+
+  useEffect(() => {
+    if (dailyScore === 100) {
+      setShowConfetti(true);
+      const timer = setTimeout(() => setShowConfetti(false), 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowConfetti(false);
+    }
+  }, [dailyScore]);
+
+  const getMotivationalMessage = () => {
+    if (dailyScore === 100) return "ภารกิจสำเร็จ! เลื่อนลงไปรับรางวัลด้านล่างเลย 🎁";
+    if (dailyScore >= 70) return "ใกล้ได้รางวัลแล้ว อย่าเพิ่งยอมแพ้! 💪";
+    if (dailyScore >= 40) return "มาถูกทางแล้ว ลุยต่อเลย! 🏃‍♀️";
+    return "พร้อมรับความท้าทายของวันนี้หรือยัง? 🎯";
+  };
+
+  const rewardsList = [
+    "ส้มตำแซ่บๆ 1 จาน (สั่งลดหวาน/เค็มลงนิดนึงเพื่อสุขภาพ)",
+    "ทุเรียนพูเล็กๆ 1 พู (ให้พอชื่นใจ)",
+    "แซลมอนซาชิมิฟินๆ 1 ชุด",
+    "ก๋วยเตี๋ยวชามโปรด 1 ชาม (อร่อยได้แต่งดซดน้ำซุปเยอะน้า)",
+    "จิ้มจุ่มมื้อเย็นฟินๆ (เน้นผักและเนื้อสัตว์ไม่ติดมัน)",
+    "ผลไม้สดแช่เย็นฉ่ำๆ (แตงโม หรือ ชมพู่)",
+    "เมี่ยงปลาเผาตัวโตๆ (เน้นกินผักเยอะๆ)",
+    "เงาะ หรือ มะขามหวาน พอให้หายอยาก",
+    "อาหารอีสาน 1 อย่างที่อยากกิน (เช่น น้ำตกหมู หรือ ลาบ)",
+    "ฝรั่ง มะละกอ หรือ พุทรา กรอบๆ เย็นๆ"
+  ];
+  const todayReward = rewardsList[diffDays % rewardsList.length];
+
+  const dailyPlan = {
+    day: 'วันนี้',
+    type: 'Arm & Core Focus (Low-Impact)',
+    meals: {
+      breakfast: 'ไข่ต้ม 2 ฟอง + นมดีน่าดีไลท์ (สูตรน้ำตาลน้อย) หรือ นมโปรตีนสูง',
+      lunch: 'ข้าวไรซ์เบอร์รี่ (กล่อง) + อกไก่นุ่ม (ในร้านสะดวกซื้อ) + ผักสลัด 1 ซอง',
+      snack: 'แอปเปิ้ลหั่นชิ้น (เตรียมจากบ้าน) หรือ อัลมอนด์ 1 ซองเล็ก',
+      dinner: 'สลัดโรลปูอัด (ซื้อจากตลาด/ร้าน) + น้ำสลัดซีฟู้ด (แตะนิดหน่อย)'
+    },
+    exercises: [
+      'ชกมวยอากาศแบบเกร็งแขน (Arm Punches) (40 วินาที)',
+      'หมุนแขนเป็นวงกลมเล็กๆ เร็วๆ (Arm Circles) (40 วินาที)',
+      'วิดพื้นดันกำแพง (Wall Push-ups) (40 วินาที)',
+      'สะพานโค้ง (Glute Bridge) (40 วินาที)' 
+    ]
+  };
+
+  const convenienceStoreIdeas = [
+    { type: 'เช้า', item: 'แซนวิชโฮลวีตทูน่า + อเมริกาโน่ไม่หวาน' },
+    { type: 'เช้า', item: 'กล้วยหอม 1 ลูก + ไข่ตุ๋นคัพ' },
+    { type: 'เที่ยง', item: 'ข้าวกล้อง + ปลาซาบะย่าง (สูตรโซเดียมต่ำ)' },
+    { type: 'เที่ยง', item: 'เกี๊ยวกุ้งน้ำ (ไม่ซดน้ำซุป) + ไข่ต้ม 1 ฟอง' },
+    { type: 'ว่าง', item: 'กรีกโยเกิร์ต (รสธรรมชาติ) + ถั่วแระญี่ปุ่น' },
+    { type: 'เย็น', item: 'ยำวุ้นเส้น (สำเร็จรูป) + อกไก่ฉีก' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#FDFBF7] text-slate-800 font-sans pb-24 selection:bg-purple-200">
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
+      `}</style>
 
-        const Dashboard = ({ user, profileName, onLogout }) => {
-            const normalizedProfileName = profileName.trim().toLowerCase();
-            const displayProfileName = profileName.trim().charAt(0).toUpperCase() + profileName.trim().slice(1).toLowerCase();
-            const localCacheKey = `p45_data_${normalizedProfileName}`;
+      {showConfetti && <Confetti />}
+
+      {/* 🚀 Header สีม่วงอมชมพูสุดพรีเมียม */}
+      <header className="relative bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-500 p-6 pb-14 rounded-b-[40px] shadow-md overflow-hidden text-white">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl -translate-y-1/3 translate-x-1/4"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-black opacity-10 rounded-full blur-xl translate-y-1/3 -translate-x-1/4"></div>
+        
+        <div className="relative z-10">
+          <div className="flex justify-between items-start mb-1">
+            <div>
+              <p className="text-white/90 font-black text-[11px] tracking-[0.2em] uppercase mb-1 flex items-center gap-1.5">
+                <Flame size={14} className="text-yellow-300" fill="currentColor"/> 
+                Flexible Fit & Firm
+              </p>
+              <h1 className="text-4xl font-black tracking-tight leading-none mb-1 uppercase drop-shadow-md text-white">
+                Project <span className="text-pink-300">45</span>
+              </h1>
+              <h2 className="text-lg font-bold text-white/90 tracking-wide mt-1">
+                Pattamapron's Challenge
+              </h2>
+            </div>
+            <div className="bg-black/20 p-2.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20">
+              <Target size={24} className="text-white"/>
+            </div>
+          </div>
+          <p className="text-white/80 font-medium text-xs mt-3 flex items-center gap-1.5">
+            <Calendar size={14} /> {dateString}
+          </p>
+        </div>
+      </header>
+
+      {/* Floating Status Cards */}
+      <div className="px-5 -mt-10 relative z-20 space-y-4">
+        
+        {/* Main Goal Card */}
+        <div className="bg-white rounded-[24px] p-5 shadow-xl shadow-purple-100/40 border border-purple-50 flex flex-col">
+          <div className="mb-3">
+            {isWeighInDay ? (
+              <div className="bg-purple-50 text-purple-600 text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-purple-100 animate-pulse shadow-sm">
+                  <Scale size={14} /> วันนี้คือวันชั่งน้ำหนัก! อัปเดตตัวเลขเลย
+              </div>
+            ) : (
+              <div className="bg-slate-50 text-slate-500 text-[10px] font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-slate-100">
+                  <Scale size={12} /> ชั่งน้ำหนักครั้งต่อไปใน {daysUntilNextWeighIn} วัน ({nextWeighInString})
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col z-10 shrink-0">
+               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                 <Target size={12} className="text-purple-500"/> เป้าหมาย: 45.0 กก.
+               </span>
+               <div className="flex items-baseline gap-1">
+                 <span className="text-4xl font-extrabold text-slate-800 tracking-tighter">{weight.toFixed(1)}</span>
+                 <span className="text-slate-500 font-bold">กก.</span>
+               </div>
+            </div>
             
-            const cachedDataStr = window.localStorage.getItem(localCacheKey);
-            const cachedData = cachedDataStr ? JSON.parse(cachedDataStr) : null;
+            <div className="flex-1 flex justify-center">
+               {/* ส่งค่า dayIndex ให้ Component ทราบว่าเป็นวันไหน */}
+               <TransformationAvatar weight={weight} targetWeight={targetWeight} initialWeight={initialWeight} dayIndex={dayIndex} />
+            </div>
 
-            const [loadingData, setLoadingData] = useState(!cachedData);
-            const [activeTab, setActiveTab] = useState('tracker'); 
-            const [showConfetti, setShowConfetti] = useState(false);
-            
-            const dateString = new Date().toDateString(); 
-            
-            const [weight, setWeight] = useState(cachedData?.weight || 52.0);
-            const [allRecords, setAllRecords] = useState(cachedData?.records || {}); 
-            const [startDateStr, setStartDateStr] = useState(cachedData?.startDate || new Date().toDateString());
-            
-            const defaultDailyData = {
-                water: 0, protein: 0, breakfastDone: false,
-                lunchDone: false, snackDone: false, dinnerDone: false,
-                exerciseChecks: [false, false, false, false],
-                fastingSuccess: false, kneePain: null
-            };
+            <div className="flex flex-col gap-1.5 bg-slate-50 p-1.5 rounded-[16px] border border-slate-100 z-10 shrink-0">
+               <button onClick={() => setWeight(prev => Number((prev + 0.1).toFixed(1)))} className="w-8 h-8 bg-white rounded-[10px] flex items-center justify-center text-slate-400 font-bold text-xl shadow-sm border border-slate-100 active:scale-95 transition-transform leading-none">+</button>
+               <button onClick={() => setWeight(prev => Math.max(40, Number((prev - 0.1).toFixed(1))))} className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-[10px] flex items-center justify-center text-white font-bold text-xl shadow-md shadow-emerald-200 active:scale-95 transition-transform leading-none">-</button>
+            </div>
+          </div>
+        </div>
 
-            const [dailyData, setDailyData] = useState(() => {
-                if (cachedData?.records && cachedData.records[dateString]) return cachedData.records[dateString];
-                return defaultDailyData;
-            });
-            
-            const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', normalizedProfileName);
+        {/* Challenge Progress */}
+        <div className="bg-white rounded-[24px] p-5 shadow-lg shadow-purple-100/30 border border-slate-50">
+           <div className="flex justify-between items-center mb-3">
+             <div className="flex items-center gap-2">
+               <Trophy size={18} className="text-amber-500" />
+               <h3 className="font-bold text-slate-700 text-sm">ความสำเร็จของแคมเปญ</h3>
+             </div>
+             <span className="text-xs font-black text-slate-400">วันที่ {diffDays > 0 ? diffDays : '0'} / 60</span>
+           </div>
+           
+           <div className="relative w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-2">
+              <div 
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-400 via-fuchsia-500 to-purple-600 rounded-full transition-all duration-1000 ease-out" 
+                style={{ width: `${overallProgress}%` }}
+              ></div>
+           </div>
+           <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+             <span>Start</span>
+             <span className="text-purple-500">{overallProgress}%</span>
+             <span>Goal</span>
+           </div>
+        </div>
+      </div>
 
-            useEffect(() => {
-                if (!user) return;
-                const timeoutId = setTimeout(() => setLoadingData(false), 2000);
+      {/* Tabs */}
+      <div className="flex justify-center gap-3 mt-8 px-5">
+        <button 
+          onClick={() => setActiveTab('tracker')}
+          className={`flex-1 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'tracker' ? 'bg-slate-900 text-white shadow-xl shadow-slate-300 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
+        >
+          <Flame size={18} className={activeTab === 'tracker' ? 'text-purple-400' : ''} />
+          เช็คลิสต์วันนี้
+        </button>
+        <button 
+          onClick={() => setActiveTab('plan')}
+          className={`flex-1 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'plan' ? 'bg-slate-900 text-white shadow-xl shadow-slate-300 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
+        >
+          <BookOpen size={18} className={activeTab === 'plan' ? 'text-fuchsia-400' : ''} />
+          แผนปฏิบัติการ
+        </button>
+      </div>
 
-                const unsubscribe = onSnapshot(docRef, (docSnap) => {
-                    clearTimeout(timeoutId); 
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        window.localStorage.setItem(localCacheKey, JSON.stringify(data));
-                        if (data.weight) setWeight(data.weight);
-                        if (data.records) setAllRecords(data.records); 
-                        if (data.startDate) setStartDateStr(data.startDate);
-                        
-                        if (data.records && data.records[dateString]) {
-                            setDailyData(data.records[dateString]);
-                        } else {
-                            setDailyData(defaultDailyData);
-                        }
-                    } else {
-                        const todayDateStr = new Date().toDateString();
-                        const dataToSave = cachedData || { weight: 52.0, records: {}, startDate: todayDateStr };
-                        if (!dataToSave.startDate) dataToSave.startDate = todayDateStr; 
-                        setDoc(docRef, dataToSave, { merge: true });
-                        setStartDateStr(todayDateStr);
-                    }
-                    setLoadingData(false);
-                }, (error) => {
-                    console.error("Cloud Error", error);
-                    setLoadingData(false);
-                });
-
-                return () => { clearTimeout(timeoutId); unsubscribe(); };
-            }, [user.uid, normalizedProfileName, dateString]);
-
-            const updateDaily = (key, value) => {
-                const newData = { ...dailyData, [key]: value };
-                setDailyData(newData); 
-                const newRecords = { ...allRecords, [dateString]: newData };
-                setAllRecords(newRecords);
-                window.localStorage.setItem(localCacheKey, JSON.stringify({ weight, records: newRecords, startDate: startDateStr }));
-                setDoc(docRef, { records: { [dateString]: newData } }, { merge: true });
-            };
-
-            const updateWeightToCloud = (newWeight) => {
-                setWeight(newWeight);
-                window.localStorage.setItem(localCacheKey, JSON.stringify({ weight: newWeight, records: allRecords, startDate: startDateStr }));
-                setDoc(docRef, { weight: newWeight }, { merge: true });
-            };
-
-            const targetWeight = 45.0;
-            const initialWeight = 52.0;
-            const targetWater = 8;
-            const targetProtein = 4;
-            
-            const todayObj = new Date();
-            const todayOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const todayStr = todayObj.toLocaleDateString('th-TH', todayOptions);
-            
-            const planStartDate = new Date(startDateStr);
-            planStartDate.setHours(0,0,0,0);
-            const todayMidnight = new Date();
-            todayMidnight.setHours(0,0,0,0);
-            const diffTime = todayMidnight.getTime() - planStartDate.getTime();
-            const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24))) + 1; 
-            const totalDays = 60; 
-            const overallProgress = Math.min(Math.round((diffDays / totalDays) * 100), 100);
-
-            let currentStreak = 0;
-            const computeScoreForRecord = (rec) => {
-                if (!rec) return 0;
-                let s = 0;
-                if (rec.breakfastDone) s += 5; if (rec.lunchDone) s += 5; if (rec.snackDone) s += 5; if (rec.dinnerDone) s += 5;
-                if (rec.water >= targetWater) s += 20;
-                if (rec.protein >= targetProtein) s += 20;
-                const exCount = (rec.exerciseChecks || []).filter(Boolean).length;
-                s += (exCount / 4) * 40; 
-                return Math.min(Math.round(s), 100);
-            };
-
-            const last7Days = Array.from({length: 7}, (_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); return d.toDateString(); });
-            
-            for (let i = 6; i >= 0; i--) {
-                const dateStr = last7Days[i];
-                if (dateStr === dateString) continue; 
-                const rec = allRecords[dateStr];
-                if (computeScoreForRecord(rec) === 100) currentStreak++;
-                else if (rec) break; 
-            }
-
-            const getDailyPlan = (dayIndex) => {
-                const baseMeals = {
-                    breakfast: 'กล้วยหอม 1 ลูก หรือ ขนมปังโฮลวีต + นมโปรตีนสูง',
-                    lunch: 'พะแนงเนื้อ 7-11 (ตักน้ำแกงน้อยๆ) หรือ สุกี้น้ำ/ชาบู (เน้นผัก ไม่ซดน้ำ)',
-                    snack: 'ทุเรียน 1 พูเล็กๆ / ลิ้นจี่ / ลำไย (กินพอหายอยาก แช่เย็นฟินๆ)',
-                    dinner: 'อาหารญี่ปุ่น เช่น ซูชิ/ซาชิมิ (ย้ำ! ❌ ห้ามมีสาหร่ายเด็ดขาด)'
-                };
-
-                const schedules = {
-                    0: { type: 'Rest & Recover (วันอาทิตย์)', target: 'ยืดเหยียด & พักกล้ามเนื้อ', meals: baseMeals, exercises: [ { title: 'Arm Cross-Body Stretch', focus: 'หัวไหล่และต้นแขน', detail: 'ยืดแขนข้ามลำตัว ค้างไว้ข้างละ 30 วินาที' }, { title: 'Overhead Tricep Stretch', focus: 'ท้องแขน', detail: 'พับแขนไปด้านหลัง ค้างไว้ข้างละ 30 วินาที' }, { title: 'แกว่งแขนลดพุง', focus: 'ระบบเลือดและแขน', detail: 'ยืนแกว่งแขนสบายๆ 100 ครั้ง' }, { title: 'เดินเล่นชิลๆ', focus: 'ผ่อนคลาย', detail: 'เดินรับลมรอบหมู่บ้าน 15 นาที' } ] },
-                    1: { type: 'Arm & Core Focus (วันจันทร์)', target: 'ลดต้นแขน & หน้าท้อง', meals: baseMeals, exercises: [ { title: 'Arm Punches (ชกมวยอากาศ)', focus: 'ต้นแขนกระชับ', detail: 'ชกสลับซ้าย-ขวาเกร็งหน้าท้อง 40 วินาที' }, { title: 'Arm Circles (หมุนแขน)', focus: 'หัวไหล่และแขน', detail: 'กางแขนตึงหมุนเป็นวงกลมเล็กๆ 40 วินาที' }, { title: 'Wall Push-ups (วิดพื้นดันกำแพง)', focus: 'หน้าอกและหลังแขน', detail: 'ดันกำแพงเบาๆ ไม่กระแทกเข่า 40 วินาที' }, { title: 'Standing Side Crunches', focus: 'เอวด้านข้าง', detail: 'ยืนเอียงตัวแตะเข่าด้านข้าง 40 วินาที' } ] },
-                    2: { type: 'Lower Body (วันอังคาร)', target: 'ปั้นก้นเด้ง & ลดสะโพก', meals: baseMeals, exercises: [ { title: 'Glute Bridge (สะพานโค้ง)', focus: 'ก้นและหลังล่าง', detail: 'นอนชันเข่ายกสะโพกขึ้นเกร็งก้น 40 วินาที' }, { title: 'Clamshells (นอนเปิดเข่า)', focus: 'สะโพกด้านข้าง', detail: 'นอนตะแคงเปิด-ปิดเข่าช้าๆ ข้างละ 30 วินาที' }, { title: 'Donkey Kicks', focus: 'กล้ามเนื้อก้น', detail: 'คุกเข่าเตะขาขึ้นฟ้า ข้างละ 30 วินาที' }, { title: 'Fire Hydrants', focus: 'สะโพกด้านนอก', detail: 'คุกเข่ายกขาออกด้านข้าง ข้างละ 30 วินาที' } ] },
-                    3: { type: 'Intense Arm Toning 🔥 (วันพุธ)', target: 'กระชับต้นแขนแบบเน้นๆ', meals: baseMeals, exercises: [ { title: 'Tricep Dips on Chair', focus: 'ท้องแขน (หลังแขน)', detail: 'ใช้เก้าอี้/โซฟาดันตัวขึ้นลงช้าๆ 40 วินาที' }, { title: 'Arm Pulses (ขยับแขนสั้นๆ)', focus: 'ต้นแขนโดยรวม', detail: 'กางแขนตึง ขยับขึ้นลงสั้นๆ รัวๆ 40 วินาที' }, { title: 'Overhead Reaches', focus: 'ไหล่และต้นแขน', detail: 'ชูแขนขึ้นสุดลงสุดไวๆ 40 วินาที' }, { title: 'Plank Taps', focus: 'แขนและแกนกลาง', detail: 'คุกเข่าแพลงก์ เอามือแตะไหล่สลับ 40 วินาที' } ] },
-                    4: { type: 'Light Cardio & Core (วันพฤหัสบดี)', target: 'เบิร์นไขมัน & เอวเอส', meals: baseMeals, exercises: [ { title: 'High Knee Marches', focus: 'คาร์ดิโอเบาๆ', detail: 'ย่ำเท้าอยู่กับที่ ยกเข่าสูง 40 วินาที' }, { title: 'Standing Bicycle Crunches', focus: 'หน้าท้อง', detail: 'ยืนบิดเอวศอกแตะเข่าสลับข้าง 40 วินาที' }, { title: 'Modified Jumping Jacks', focus: 'เบิร์นทั่วตัว', detail: 'กางแขน-ขาแบบก้าวเดิน (ไม่กระโดด) 40 วินาที' }, { title: 'Bird-Dog', focus: 'หลังและแกนกลาง', detail: 'คุกเข่ายืดแขนสลับขา ค้างไว้ 40 วินาที' } ] },
-                    5: { type: 'Full Body & Arm Firming (วันศุกร์)', target: 'กระชับทั้งตัว & แขนเล็ก', meals: baseMeals, exercises: [ { title: 'Water Bottle Punches', focus: 'ต้นแขน', detail: 'ถือขวดน้ำเล็กๆ ชกมวยอากาศ 40 วินาที' }, { title: 'Wall Sit (นั่งพิงกำแพง)', focus: 'ต้นขา', detail: 'พิงกำแพงย่อตัวค้างไว้ 40 วินาที' }, { title: 'Incline Plank', focus: 'หน้าท้องและแขน', detail: 'วางมือบนโต๊ะ/โซฟา เกร็งหน้าท้อง 40 วินาที' }, { title: 'Knee Push-ups', focus: 'อกและแขน', detail: 'คุกเข่าวิดพื้นช้าๆ 40 วินาที' } ] },
-                    6: { type: 'Upper Body & Posture (วันเสาร์)', target: 'แก้ปวดหลัง & กระชับไหล่', meals: baseMeals, exercises: [ { title: 'Arm Scissors', focus: 'อกและต้นแขน', detail: 'กางแขนกว้างแล้วหุบไขว้กันสลับไปมา 40 วินาที' }, { title: 'Reverse Snow Angels', focus: 'หลังช่วงบนและไหล่', detail: 'นอนคว่ำยกแขนวาดขึ้นลง 40 วินาที' }, { title: 'Superman Pose', focus: 'หลังล่าง', detail: 'นอนคว่ำยกแขนและขาขึ้นพร้อมกัน 40 วินาที' }, { title: 'Child\'s Pose', focus: 'ยืดหลังและแขน', detail: 'หมอบกราบเหยียดแขนสุด ค้างไว้ 40 วินาที' } ] }
-                };
-                return schedules[dayIndex];
-            };
-
-            const dailyPlan = getDailyPlan(todayObj.getDay());
-
-            const convenienceStoreIdeas = [ 
-                { type: 'เช้า', item: 'กาแฟดำ หรือ นมโปรตีนสูง + กล้วยหอม' }, 
-                { type: 'เที่ยง', item: 'ข้าวพะแนงเนื้อ 7-11 (เน้นกินเนื้อ ราดน้ำแกงน้อยๆ)' }, 
-                { type: 'ว่าง', item: 'ทุเรียนชิ้นเล็ก / ลิ้นจี่ / ลำไย (กินพอชื่นใจ 5-6 ลูก)' }, 
-                { type: 'เย็น', item: 'ชาบู/สุกี้ (เน้นหมูและผัก ไม่ซดน้ำหลีกเลี่ยงโซเดียม)' }, 
-                { type: 'เตือน!', item: '❌ งดอาหารที่มี "สาหร่าย" ทุกชนิดเด็ดขาด!' } 
-            ];
-            
-            const waterSchedule = [ { time: '07:00 - 08:00', desc: 'ตื่นนอน (กระตุ้นขับถ่าย)', amount: 2, ml: 500 }, { time: '10:00 - 12:00', desc: 'สายถึงเที่ยง (ลดหิว)', amount: 2, ml: 500 }, { time: '14:00 - 16:00', desc: 'บ่าย (เติมความสดชื่น ผิวสวย)', amount: 2, ml: 500 }, { time: '18:00 - 20:00', desc: 'ก่อนนอน (จิบเบาๆ)', amount: 2, ml: 500 } ];
-
-            const husbandQuotes = [
-                "สู้ๆ นะคนสวย หุ่นปังรออยู่! 💖",
-                "เหนื่อยไหมวันนี้? เดี๋ยวพาไปหาของอร่อยนะ 🍱",
-                "เก่งมากที่รัก ยิ้มหน่อยยย 😊",
-                "เธอทำได้อยู่แล้ว ฉันเชื่อในตัวเธอนะ! 💪",
-                "ไม่ต้องรีบ ค่อยๆ ลดไปด้วยกันนะ 🏃‍♀️🏃‍♂️",
-                "หุ่นสวยขึ้นทุกวันเลยนะเนี่ย! ✨",
-                "วันนี้ตั้งใจกินน้ำเยอะๆ นะครับคนเก่ง 💧"
-            ];
-            const todayQuote = husbandQuotes[diffDays % husbandQuotes.length];
-
-            const [mealsOpen, setMealsOpen] = useState(true);
-            const [proteinOpen, setProteinOpen] = useState(true);
-            const [waterOpen, setWaterOpen] = useState(true);
-            const [exOpen, setExOpen] = useState(true);
-
-            useEffect(() => { const allDone = dailyData.breakfastDone && dailyData.lunchDone && dailyData.snackDone && dailyData.dinnerDone; setMealsOpen(!allDone); }, [dailyData.breakfastDone, dailyData.lunchDone, dailyData.snackDone, dailyData.dinnerDone]);
-            useEffect(() => { setProteinOpen(dailyData.protein < targetProtein); }, [dailyData.protein]);
-            useEffect(() => { setWaterOpen(dailyData.water < targetWater); }, [dailyData.water]);
-            useEffect(() => { const completedEx = dailyData.exerciseChecks.filter(Boolean).length; setExOpen(completedEx < dailyPlan.exercises.length); }, [dailyData.exerciseChecks, dailyPlan.exercises.length]);
-
-            let dailyScore = 0;
-            if (dailyData.breakfastDone) dailyScore += 5; if (dailyData.lunchDone) dailyScore += 5; if (dailyData.snackDone) dailyScore += 5; if (dailyData.dinnerDone) dailyScore += 5;
-            if (dailyData.water >= targetWater) dailyScore += 20;
-            if (dailyData.protein >= targetProtein) dailyScore += 20;
-            const completedExercises = dailyData.exerciseChecks.filter(Boolean).length;
-            dailyScore += (completedExercises / dailyPlan.exercises.length) * 40; 
-            dailyScore = Math.min(Math.round(dailyScore), 100);
-
-            useEffect(() => {
-                if (dailyScore === 100) { setShowConfetti(true); const timer = setTimeout(() => setShowConfetti(false), 5000); return () => clearTimeout(timer); }
-                else setShowConfetti(false);
-            }, [dailyScore]);
-
-            const getMotivationalMessage = () => {
-                if (dailyScore === 100) return "เย้! ภารกิจสำเร็จแล้ว รับรางวัลด้านล่างเลย 🎁";
-                if (dailyScore >= 70) return "เก่งมากเลย ใกล้สำเร็จแล้ว! ✨";
-                if (dailyScore >= 40) return "ทำดีมากค่ะ ลุยต่อเลยน้า! 💖";
-                return "มาเริ่มดูแลตัวเองกันเถอะ! 🌸";
-            };
-
-            const [showGacha, setShowGacha] = useState(false);
-            const regularRewards = [ "ชาบู / สุกี้ มื้อใหญ่จัดเต็ม! 🍲", "ทุเรียนหมอนทองพูสวยๆ (รางวัลคนเก่ง) 💛", "ลิ้นจี่ หรือ ลำไย หวานฉ่ำชื่นใจ 🍒", "อาหารญี่ปุ่นเซ็ตพรีเมียม (ย้ำว่าไม่เอาสาหร่าย!) 🍣", "พะแนงเนื้อร้านเด็ด (กินคู่ข้าวสวยร้อนๆ) 🍛", "ยำแซลมอนแซ่บๆ หรือ ส้มตำ 🌶️" ];
-            const randomSeed = diffDays * (todayObj.getMonth() + 1);
-            const isJackpot = (randomSeed % 10) === 0; 
-            const todayReward = isJackpot ? "💎 รางวัลระดับ Platinum: ทวงสามีพาไปกิน 'โอมากาเสะ' 🍣 หรืออาหารหรู 1 มื้อด่วน!" : regularRewards[diffDays % regularRewards.length];
-
-            if (loadingData) {
-                return (
-                    <div className="min-h-screen flex flex-col items-center justify-center text-purple-400 bg-[#faf5ff]">
-                        <div className="w-14 h-14 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4"></div>
-                        <p className="font-bold text-base">กำลังโหลดตู้เซฟคนสวย... 🌸</p>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="min-h-screen text-slate-700 pb-24 selection:bg-purple-200 animation-fade-in font-sans">
-                    {showConfetti && <Confetti />}
-
-                    <header className="relative bg-gradient-to-br from-purple-600 via-fuchsia-500 to-pink-500 pt-12 pb-24 px-6 rounded-b-[48px] shadow-[0_10px_30px_rgba(192,132,252,0.3)] overflow-hidden text-white z-10">
-                        <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white opacity-10 rounded-full blur-[40px]"></div>
-                        <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-pink-300 opacity-20 rounded-full blur-[40px]"></div>
-                        <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-3">
-                                <div>
-                                    <p className="text-pink-100 font-bold text-xs tracking-[0.2em] uppercase mb-1 drop-shadow-sm flex items-center gap-1.5"><span className="text-yellow-300 text-sm">✨</span> Flexible Fit & Firm</p>
-                                    <h1 className="text-5xl font-black tracking-tight leading-none mb-1 drop-shadow-md">Project <span className="text-pink-200">45</span></h1>
-                                    <div className="flex items-center gap-2 mt-3">
-                                        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm border border-white/10">
-                                            <span className="text-base">👋</span><h2 className="text-sm font-bold text-white tracking-wide">Hi, {displayProfileName}!</h2>
-                                        </div>
-                                        {currentStreak > 0 && (
-                                            <div className="inline-flex items-center gap-1 bg-gradient-to-r from-orange-400 to-rose-400 text-white px-3 py-1.5 rounded-full text-xs font-black shadow-md animate-pulse border border-orange-300/50">
-                                                🔥 {currentStreak} Day Streak
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <button onClick={onLogout} className="bg-white/10 hover:bg-white/20 p-3 rounded-2xl backdrop-blur-md shadow-sm border border-white/20 flex flex-col items-center transition-colors">
-                                    <span className="text-2xl mb-1">🚪</span><span className="text-[9px] font-black mt-1 uppercase tracking-widest text-pink-50">ออกระบบ</span>
-                                </button>
-                            </div>
-                            <div className="mt-5 p-3.5 bg-white/10 rounded-[16px] border border-white/20 backdrop-blur-md shadow-inner">
-                                <p className="text-sm italic font-medium text-pink-50 flex items-start gap-2.5">
-                                    <span className="text-xl leading-none">💌</span><span>"{todayQuote}"</span>
-                                </p>
-                            </div>
-                        </div>
-                    </header>
-
-                    <div className="px-5 -mt-12 relative z-20 space-y-5">
-                        <div className="glass-card rounded-[32px] p-6 shadow-[0_8px_30px_rgb(192,132,252,0.15)] border border-white flex flex-col relative overflow-hidden bg-white/70">
-                            <div className="absolute right-[-10%] top-[-10%] w-32 h-32 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full blur-2xl opacity-60"></div>
-                            <div className="flex items-center justify-between gap-3 relative z-10">
-                                <div className="flex flex-col shrink-0">
-                                    <span className="text-xs font-black uppercase tracking-widest text-purple-500 mb-1 flex items-center gap-1.5">🎯 เป้าหมาย: 45.0 kg</span>
-                                    <div className="flex items-baseline gap-1 mt-1">
-                                        <input type="number" step="0.1" value={weight} onChange={(e) => updateWeightToCloud(parseFloat(e.target.value) || 0)} className="w-28 bg-transparent text-6xl font-black text-slate-800 tracking-tighter outline-none border-b-[3px] border-dashed border-purple-200 focus:border-purple-500 transition-colors" />
-                                    </div>
-                                    <div className="flex gap-2.5 mt-5">
-                                        <button onClick={() => updateWeightToCloud(Number((weight + 0.1).toFixed(1)))} className="w-12 h-12 bg-white rounded-2xl text-purple-400 font-black text-2xl shadow-sm border border-purple-50 active:scale-95 transition-all hover:bg-purple-50">+</button>
-                                        <button onClick={() => updateWeightToCloud(Math.max(40, Number((weight - 0.1).toFixed(1))))} className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl text-white font-black text-3xl shadow-lg shadow-purple-200 active:scale-95 transition-all">-</button>
-                                    </div>
-                                </div>
-                                <div className="flex-1 flex justify-end mr-1"><CuteGirlAvatar weight={weight} targetWeight={targetWeight} initialWeight={initialWeight} /></div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-purple-50">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-bold text-slate-700 text-sm flex items-center gap-2"><span className="text-xl">🗓️</span> วันที่ {diffDays} / 60</h3>
-                                <span className="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">{overallProgress}%</span>
-                            </div>
-                            <div className="relative w-full bg-slate-100 h-4 rounded-full overflow-hidden mb-2 shadow-inner">
-                                <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 rounded-full transition-all duration-1000 ease-out" style={{ width: `${overallProgress}%` }}></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center gap-3 mt-6 px-5">
-                        <button onClick={() => setActiveTab('tracker')} className={`flex-1 py-4 px-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'tracker' ? 'bg-purple-600 text-white shadow-xl shadow-purple-200 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200'}`}>
-                            💖 ภารกิจ
-                        </button>
-                        <button onClick={() => setActiveTab('plan')} className={`flex-1 py-4 px-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'plan' ? 'bg-purple-600 text-white shadow-xl shadow-purple-200 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200'}`}>
-                            📝 เสบียง
-                        </button>
-                        <button onClick={() => setActiveTab('stats')} className={`flex-1 py-4 px-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'stats' ? 'bg-purple-600 text-white shadow-xl shadow-purple-200 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200'}`}>
-                            📊 สถิติ
-                        </button>
-                    </div>
-                    
-                    <main className="px-5 mt-8 space-y-6">
-                        {activeTab === 'tracker' ? (
-                            <>
-                                <section className={`rounded-[32px] p-7 flex items-center justify-between relative overflow-hidden transition-colors duration-500 shadow-lg ${dailyScore === 100 ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none' : 'bg-white border border-purple-50 text-slate-800'}`}>
-                                    <div className="relative z-10 max-w-[60%]">
-                                        <h2 className={`font-black text-2xl mb-2 ${dailyScore === 100 ? 'text-white' : 'text-purple-700'}`}>คะแนนความสวย ✨</h2>
-                                        <p className={`text-sm font-bold leading-relaxed ${dailyScore === 100 ? 'text-pink-100' : 'text-slate-500'}`}>{getMotivationalMessage()}</p>
-                                    </div>
-                                    <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
-                                        <svg className="w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
-                                            <path className={dailyScore === 100 ? 'text-white/20' : 'text-slate-100'} strokeWidth="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                            <path className={`transition-all duration-1000 ease-out ${dailyScore === 100 ? 'text-white' : 'text-purple-500'}`} strokeDasharray={`${dailyScore}, 100`} strokeWidth="4" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        </svg>
-                                        <div className="absolute flex flex-col items-center justify-center"><span className="text-2xl font-black">{dailyScore}</span></div>
-                                    </div>
-                                </section>
-
-                                <section className={`rounded-[28px] p-6 shadow-md border transition-all duration-500 ${dailyScore === 100 ? 'bg-gradient-to-r from-fuchsia-50 to-pink-50 border-pink-200' : 'bg-white border-slate-100'}`}>
-                                    {dailyScore === 100 && !showGacha ? (
-                                        <div className="text-center py-5 cursor-pointer" onClick={() => setShowGacha(true)}>
-                                            <div className="text-7xl animate-shake drop-shadow-xl mb-3 inline-block">🎁</div>
-                                            <h3 className="font-black text-lg text-pink-600 animate-pulse">กดเพื่อสุ่มรางวัลของวันนี้!</h3>
-                                            <p className="text-sm text-pink-400 mt-1">ลุ้นโอมากาเสะจากสามี!</p>
-                                        </div>
-                                    ) : showGacha ? (
-                                        <div className="flex items-center gap-5 animation-fade-in">
-                                            <div className={`w-16 h-16 rounded-[20px] flex items-center justify-center shrink-0 text-3xl bg-pink-500 text-white shadow-xl shadow-pink-200 scale-110`}>{isJackpot ? '💎' : '🎉'}</div>
-                                            <div>
-                                                <h3 className="font-black text-base text-pink-600">ยินดีด้วยคนเก่ง!</h3>
-                                                <p className="text-xs mt-2 font-medium leading-relaxed text-purple-800">วันนี้ได้สิทธิ์ทาน <br/><strong className="bg-pink-100 px-2 py-0.5 rounded text-pink-700 text-sm">{todayReward}</strong> <br/>ให้รางวัลตัวเองเลยค่ะ 💖</p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-[20px] flex items-center justify-center shrink-0 text-3xl bg-slate-50 text-slate-300 border-2 border-slate-100">🎁</div>
-                                            <div>
-                                                <h3 className="font-black text-base text-slate-400">มีกล่องสุ่มรางวัลรออยู่น้า</h3>
-                                                <p className="text-xs mt-1.5 font-medium leading-relaxed text-slate-400">ทำภารกิจด้านล่างให้ครบ 100% เพื่อลุ้นของอร่อยวันนี้!</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </section>
-
-                                <section className="bg-white rounded-[28px] p-6 shadow-md border border-purple-50 transition-all duration-500">
-                                    <div className="flex items-center justify-between cursor-pointer" onClick={() => setMealsOpen(!mealsOpen)}>
-                                        <h2 className="font-black text-slate-800 flex items-center gap-2 text-base"><span className="text-2xl">🥗</span> วินัยการกิน (20 Pts)</h2>
-                                        <span className="text-slate-400 text-sm font-bold bg-slate-50 px-3 py-1 rounded-full">{mealsOpen ? 'ซ่อน' : 'เปิด'}</span>
-                                    </div>
-                                    {mealsOpen && (
-                                    <div className="grid gap-3 mt-5 animation-fade-in">
-                                        {[
-                                            { key: 'breakfastDone', state: dailyData.breakfastDone, icon: '🥞', title: 'มื้อเช้า', time: '10:00', desc: dailyPlan.meals.breakfast, color: 'fuchsia' },
-                                            { key: 'lunchDone', state: dailyData.lunchDone, icon: '🍱', title: 'มื้อเที่ยง', time: '13:00', desc: dailyPlan.meals.lunch, color: 'purple' },
-                                            { key: 'snackDone', state: dailyData.snackDone, icon: '🧁', title: 'มื้อว่าง', time: '16:00', desc: dailyPlan.meals.snack, color: 'pink' },
-                                            { key: 'dinnerDone', state: dailyData.dinnerDone, icon: '🍲', title: 'มื้อเย็น', time: '18:30', desc: dailyPlan.meals.dinner, color: 'violet' }
-                                        ].map((meal, idx) => (
-                                            <div key={idx} onClick={() => updateDaily(meal.key, !meal.state)} className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${meal.state ? 'bg-slate-50/50 border border-slate-100 opacity-60 shadow-inner' : 'bg-white shadow-sm border border-purple-100 hover:border-purple-300 hover:shadow-md'}`}>
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-colors ${meal.state ? `bg-slate-100 grayscale` : `bg-${meal.color}-100 shadow-sm`}`}>{meal.icon}</div>
-                                                    <div>
-                                                        <h3 className={`font-extrabold text-base transition-all ${meal.state ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>{meal.title} <span className="text-[10px] font-bold text-slate-400 ml-2 bg-slate-100 px-2 py-0.5 rounded-md">{meal.time}</span></h3>
-                                                        <p className={`text-xs mt-1 line-clamp-2 font-medium leading-relaxed ${meal.state ? 'text-slate-400' : 'text-slate-500'}`}>{meal.desc}</p>
-                                                    </div>
-                                                </div>
-                                                <div className={`relative w-8 h-8 rounded-full border-[3px] flex items-center justify-center shrink-0 transition-colors ${meal.state ? `border-${meal.color}-500 bg-${meal.color}-500` : 'border-slate-200 bg-slate-50'}`}>
-                                                    {meal.state && <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    )}
-                                </section>
-
-                                <section className="bg-white rounded-[28px] p-6 shadow-md border border-purple-50 relative overflow-hidden mt-2 transition-all duration-500">
-                                    <div className="absolute bottom-0 left-0 right-0 bg-pink-50/80 transition-all duration-700 -z-0" style={{ height: `${Math.min((dailyData.protein/targetProtein)*100, 100)}%` }}></div>
-                                    <div className="relative z-10">
-                                        <div className="flex items-center justify-between mb-4 cursor-pointer" onClick={() => setProteinOpen(!proteinOpen)}>
-                                            <h2 className="font-black text-slate-800 text-base flex items-center gap-2"><span className="text-2xl">🥩</span> สะสมโปรตีน (20 Pts)</h2>
-                                            <div className="flex items-center gap-2">
-                                                <div className="bg-white/80 backdrop-blur text-pink-600 px-4 py-1.5 rounded-full text-sm font-black shadow-sm border border-pink-100">{dailyData.protein} / {targetProtein} ฝ่ามือ</div>
-                                            </div>
-                                        </div>
-                                        {proteinOpen && (
-                                        <div className="animation-fade-in">
-                                            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-[16px] border border-pink-100 mb-6 shadow-sm">
-                                                <p className="text-xs text-pink-600 font-black mb-1">💡 1 แต้ม (1 ฝ่ามือ) เท่ากับ:</p>
-                                                <p className="text-xs text-slate-600 font-medium leading-relaxed">เนื้อสัตว์ 1 ฝ่ามือหนาๆ, ไข่ต้ม 2 ฟอง, อกไก่ 1 ชิ้น หรือ นมโปรตีนสูง 1 ขวด</p>
-                                            </div>
-                                            <div className="flex items-center justify-center gap-8 mb-3">
-                                                <button onClick={() => updateDaily('protein', Math.max(0, dailyData.protein - 1))} className="w-14 h-14 rounded-[18px] bg-white border-2 border-slate-200 text-2xl font-bold text-slate-400 active:scale-95 shadow-sm hover:bg-slate-50">-</button>
-                                                <div className="text-7xl transition-all duration-500" style={{ filter: dailyData.protein >= targetProtein ? 'drop-shadow(0px 8px 15px rgba(244, 114, 182, 0.5))' : 'grayscale(1)' }}>🍗</div>
-                                                <button onClick={() => updateDaily('protein', dailyData.protein + 1)} className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-pink-400 to-rose-400 text-white text-2xl font-black active:scale-95 shadow-lg shadow-pink-200 hover:scale-105 transition-transform">+</button>
-                                            </div>
-                                        </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section className="bg-white rounded-[28px] p-6 shadow-md border border-purple-50 relative overflow-hidden mt-2 transition-all duration-500">
-                                    <div className="absolute bottom-0 left-0 right-0 bg-blue-50/80 transition-all duration-700 -z-0" style={{ height: `${Math.min((dailyData.water/targetWater)*100, 100)}%` }}></div>
-                                    <div className="relative z-10">
-                                        <div className="flex items-center justify-between mb-5 cursor-pointer" onClick={() => setWaterOpen(!waterOpen)}>
-                                            <h2 className="font-black text-slate-800 text-base flex items-center gap-2"><span className="text-2xl">🧊</span> เติมน้ำผิวสวย (20 Pts)</h2>
-                                            <div className="flex items-center gap-2">
-                                                <div className="bg-white/80 backdrop-blur text-blue-600 px-4 py-1.5 rounded-full text-sm font-black shadow-sm border border-blue-100">{dailyData.water} / {targetWater} แก้ว</div>
-                                            </div>
-                                        </div>
-                                        {waterOpen && (
-                                        <div className="animation-fade-in">
-                                            <div className="flex items-center justify-center gap-8 mb-8">
-                                                <button onClick={() => updateDaily('water', Math.max(0, dailyData.water - 1))} className="w-14 h-14 rounded-[18px] bg-white border-2 border-slate-200 text-2xl font-bold text-slate-400 active:scale-95 shadow-sm hover:bg-slate-50">-</button>
-                                                <div className="text-7xl transition-all duration-500" style={{ filter: dailyData.water >= targetWater ? 'drop-shadow(0px 8px 15px rgba(59, 130, 246, 0.4))' : 'grayscale(1)' }}>💧</div>
-                                                <button onClick={() => updateDaily('water', dailyData.water + 1)} className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-blue-400 to-cyan-400 text-white text-2xl font-black active:scale-95 shadow-lg shadow-blue-200 hover:scale-105 transition-transform">+</button>
-                                            </div>
-                                            <div className="mt-5 pt-5 border-t border-slate-100">
-                                                <h3 className="text-xs font-bold text-slate-500 mb-4 text-center bg-slate-50 py-2 rounded-lg">ตารางดื่มน้ำให้ครบ 2 ลิตร/วัน (แก้วละ ~250 ml)</h3>
-                                                <div className="space-y-3">
-                                                    {waterSchedule.map((item, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between bg-white/80 p-3.5 rounded-[16px] border border-blue-50 shadow-sm">
-                                                            <div className="flex flex-col gap-1.5">
-                                                                <span className="text-[11px] font-black text-blue-600 w-max bg-blue-50 px-2.5 py-1 rounded-md">{item.time}</span>
-                                                                <span className="text-xs font-medium text-slate-600 pl-1">{item.desc}</span>
-                                                            </div>
-                                                            <div className="text-sm font-black text-blue-600 bg-white px-3 py-2 rounded-xl shadow-sm border border-blue-100 whitespace-nowrap">
-                                                                {item.amount} แก้ว
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section className="bg-white rounded-[28px] p-6 shadow-md border border-purple-50 mt-2 transition-all duration-500">
-                                    <div className="flex items-center justify-between cursor-pointer" onClick={() => setExOpen(!exOpen)}>
-                                        <div>
-                                            <h2 className="font-black text-slate-800 flex items-center gap-2 text-base"><span className="text-2xl">💃</span> ขยับร่างกาย (40 Pts)</h2>
-                                            <p className="text-xs text-purple-600 font-bold mt-1.5 ml-9 bg-purple-50 inline-block px-2 py-0.5 rounded">เป้าหมาย: ลดต้นแขน & หน้าท้อง</p>
-                                        </div>
-                                        <div className="bg-slate-50 px-3 py-1.5 rounded-full text-xs font-bold text-slate-400">{exOpen ? 'ซ่อน' : 'เปิด'}</div>
-                                    </div>
-                                    {exOpen && (
-                                    <div className="grid gap-3 mt-6 animation-fade-in">
-                                        {dailyPlan.exercises.map((ex, idx) => {
-                                            const isDone = dailyData.exerciseChecks[idx] || false;
-                                            return (
-                                            <div key={idx} onClick={() => {
-                                                const newChecks = [...dailyData.exerciseChecks];
-                                                newChecks[idx] = !isDone;
-                                                updateDaily('exerciseChecks', newChecks);
-                                            }} className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${isDone ? 'bg-slate-50/50 border border-slate-100 opacity-60 shadow-inner' : 'bg-white shadow-sm border border-purple-100 hover:border-purple-300 hover:shadow-md'}`}>
-                                                <div className="flex items-start gap-4">
-                                                    <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center transition-colors ${isDone ? 'bg-slate-100 text-slate-400' : 'bg-purple-100 text-purple-600'}`}><span className="font-black text-lg">{idx + 1}</span></div>
-                                                    <div className="pr-2 mt-0.5">
-                                                        <h3 className={`font-extrabold text-base transition-all leading-tight ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{ex.title}</h3>
-                                                        <p className={`text-xs mt-2 font-medium leading-relaxed ${isDone ? 'text-slate-400' : 'text-slate-600'}`}>
-                                                            <span className={`px-2 py-1 rounded-lg mr-2 text-[10px] font-bold ${isDone ? 'bg-slate-100 text-slate-400' : 'bg-purple-50 text-purple-600'}`}>🎯 {ex.focus}</span>
-                                                            {ex.detail}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className={`relative w-8 h-8 shrink-0 rounded-full border-[3px] flex items-center justify-center transition-colors ${isDone ? 'border-purple-500 bg-purple-500' : 'border-slate-200 bg-white'}`}>
-                                                    {isDone && <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>}
-                                                </div>
-                                            </div>
-                                        )})}
-                                    </div>
-                                    )}
-                                </section>
-
-                                <section className="grid grid-cols-2 gap-4 my-5 pb-5">
-                                    <div onClick={() => updateDaily('fastingSuccess', !dailyData.fastingSuccess)} className={`p-5 rounded-[28px] border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between active:scale-95 ${dailyData.fastingSuccess ? 'border-indigo-400 bg-indigo-50 shadow-md shadow-indigo-100/50' : 'border-transparent bg-white shadow-sm border-slate-100 hover:border-indigo-200 hover:shadow-md'}`}>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center text-3xl transition-transform ${dailyData.fastingSuccess ? 'bg-indigo-500 text-white shadow-md scale-105' : 'bg-slate-50'}`}>🌌</div>
-                                            <div className={`relative w-7 h-7 rounded-full border-[3px] flex items-center justify-center shrink-0 transition-colors ${dailyData.fastingSuccess ? 'border-indigo-500 bg-indigo-500' : 'border-slate-200'}`}>
-                                                {dailyData.fastingSuccess && <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h3 className={`font-black text-base ${dailyData.fastingSuccess ? 'text-indigo-800' : 'text-slate-800'}`}>งดมื้อดึก (IF)</h3>
-                                            <p className="text-[10px] text-slate-500 font-bold mt-1.5 uppercase tracking-wider">โบนัสวินัย • หลัง 19:00 น.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-5 rounded-[28px] border border-slate-100 bg-white shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-                                        <h2 className="font-black text-sm text-slate-500 mb-4 flex items-center gap-2"><span className="text-2xl">🦵</span> เช็คหัวเข่า</h2>
-                                        <div className="flex justify-between gap-2 mt-auto">
-                                            <button onClick={() => updateDaily('kneePain', 'none')} className={`flex-1 py-3.5 rounded-[18px] flex flex-col items-center gap-1.5 transition-all duration-300 ${dailyData.kneePain === 'none' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm scale-105' : 'bg-slate-50 text-slate-400 border border-transparent hover:bg-slate-100'}`}>
-                                                <span className="text-2xl leading-none">🥰</span><span className="text-[11px] font-bold">ปกติ</span>
-                                            </button>
-                                            <button onClick={() => updateDaily('kneePain', 'mild')} className={`flex-1 py-3.5 rounded-[18px] flex flex-col items-center gap-1.5 transition-all duration-300 ${dailyData.kneePain === 'mild' ? 'bg-orange-100 text-orange-700 border border-orange-200 shadow-sm scale-105' : 'bg-slate-50 text-slate-400 border border-transparent hover:bg-slate-100'}`}>
-                                                <span className="text-2xl leading-none">🥺</span><span className="text-[11px] font-bold">ตึงนิดๆ</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </section>
-                            </>
-                        ) : activeTab === 'plan' ? (
-                            <div className="space-y-6 pb-10 animation-fade-in">
-                                <section className="bg-white rounded-[32px] p-7 shadow-md border border-purple-50 relative overflow-hidden">
-                                    <div className="absolute top-[-10%] right-[-10%] w-40 h-40 bg-purple-100 rounded-full blur-3xl opacity-60"></div>
-                                    <div className="flex justify-between items-center mb-8 relative z-10">
-                                        <h2 className="font-black text-xl text-purple-900 flex items-center gap-2">🍱 แผนเสบียงวันนี้</h2>
-                                        <div className="bg-pink-50 text-pink-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-wider border border-pink-100">Convenience Mode</div>
-                                    </div>
-                                    <div className="space-y-7 relative ml-5 z-10">
-                                        <div className="absolute left-[15px] top-4 bottom-4 w-[3px] bg-purple-100 -z-10 rounded-full"></div>
-                                        {[
-                                            { time: '10:00', meal: 'มื้อเช้า', desc: dailyPlan.meals.breakfast, icon: '🥞', color: 'fuchsia' },
-                                            { time: '13:00', meal: 'มื้อเที่ยง', desc: dailyPlan.meals.lunch, icon: '🍱', color: 'purple' },
-                                            { time: '16:00', meal: 'มื้อว่าง', desc: dailyPlan.meals.snack, icon: '🧁', color: 'pink' },
-                                            { time: '18:30', meal: 'มื้อเย็น', desc: dailyPlan.meals.dinner, icon: '🍲', color: 'violet' }
-                                        ].map((item, idx) => (
-                                            <div key={idx} className="flex gap-5 items-start relative">
-                                                <div className={`w-8 h-8 rounded-full border-4 border-white bg-${item.color}-200 flex items-center justify-center shrink-0 shadow-sm mt-1 -ml-[4px] text-base`}>{item.icon}</div>
-                                                <div className="bg-slate-50 p-5 rounded-[24px] flex-1 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-${item.color}-100 text-${item.color}-700`}>{item.time}</span>
-                                                        <h3 className="font-extrabold text-slate-800 text-base">{item.meal}</h3>
-                                                    </div>
-                                                    <p className="text-sm font-medium text-slate-600 leading-relaxed">{item.desc}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="mt-10 pt-8 border-t-2 border-slate-50 relative z-10">
-                                        <h3 className="font-black text-purple-600 text-sm uppercase tracking-wide mb-4 flex items-center gap-2">
-                                            <span className="bg-purple-100 p-2 rounded-xl text-lg">🏪</span> ไอเดียเมนูร้านสะดวกซื้อ
-                                        </h3>
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {convenienceStoreIdeas.map((idea, idx) => (
-                                                <div key={idx} className={`flex items-center gap-3 text-xs bg-white p-4 rounded-[20px] border shadow-sm ${idea.type === 'เตือน!' ? 'border-red-100 bg-red-50/50' : 'border-slate-100'}`}>
-                                                    <span className={`font-black px-2.5 py-1.5 rounded-xl shrink-0 text-[10px] uppercase tracking-wider ${idea.type === 'เตือน!' ? 'bg-red-100 text-red-600' : 'bg-purple-50 text-purple-600'}`}>{idea.type}</span>
-                                                    <span className={`font-medium leading-snug ${idea.type === 'เตือน!' ? 'text-red-600' : 'text-slate-600'}`}>{idea.item}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <section className="bg-gradient-to-br from-purple-800 to-fuchsia-900 rounded-[32px] p-8 shadow-xl border border-purple-700/50 mb-10 text-white relative overflow-hidden">
-                                    <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white opacity-10 rounded-full blur-[40px]"></div>
-                                    <div className="absolute bottom-[-10%] left-[-10%] w-48 h-48 bg-pink-400 opacity-20 rounded-full blur-[40px]"></div>
-                                    
-                                    <div className="relative z-10">
-                                        <div className="mb-8">
-                                            <h2 className="font-black text-2xl text-white flex items-center gap-2 drop-shadow-md">💃 ขยับร่างกายวันนี้</h2>
-                                            <div className="inline-block bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full mt-3 shadow-sm border border-white/10">
-                                                <p className="text-xs font-bold text-pink-100 uppercase tracking-widest">{dailyPlan.type}</p>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-4">
-                                            {dailyPlan.exercises.map((ex, idx) => {
-                                                const isDone = dailyData.exerciseChecks[idx];
-                                                return (
-                                                <div key={idx} className={`flex items-center gap-5 p-5 rounded-[24px] transition-all border ${isDone ? 'bg-white/20 border-white/30 shadow-inner' : 'bg-black/20 border-white/10 shadow-md'}`}>
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-base font-black shadow-sm transition-colors shrink-0 ${isDone ? 'bg-white text-purple-600 scale-110' : 'bg-white/10 text-white/50'}`}>
-                                                        {isDone ? '✓' : idx + 1}
-                                                    </div>
-                                                    <div>
-                                                        <span className={`text-base font-bold transition-all block leading-tight ${isDone ? 'text-pink-200 line-through decoration-pink-300/50' : 'text-white'}`}>{ex.title}</span>
-                                                        <span className={`text-xs mt-2 block font-medium ${isDone ? 'text-white/70' : 'text-purple-200'}`}>🎯 {ex.focus} <br/><span className="mt-1 block opacity-80">{ex.detail}</span></span>
-                                                    </div>
-                                                </div>
-                                            )})}
-                                        </div>
-                                        <div className="mt-8 p-5 bg-black/30 rounded-[24px] text-xs font-medium text-pink-100 flex items-start gap-4 border border-white/10 leading-relaxed backdrop-blur-md shadow-inner">
-                                            <span className="text-2xl">🥺</span>
-                                            <p className="mt-1">ทำท่าละ 40 วินาที พัก 20 วินาที ทำวนให้ครบ 4 รอบ <strong className="text-white block mt-2 text-sm bg-red-500/50 w-max px-2 py-1 rounded">ระวัง! หากเจ็บแปล๊บที่เข่าให้หยุดทำทันทีนะคะ</strong></p>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
-                        ) : activeTab === 'stats' ? (
-                            <div className="space-y-6 pb-10 animation-fade-in">
-                                <section className="bg-white rounded-[32px] p-7 shadow-md border border-purple-50">
-                                    <h2 className="font-black text-xl text-purple-900 mb-1 flex items-center gap-2">📊 สถิติความปัง 7 วัน</h2>
-                                    <p className="text-xs text-slate-500 mb-8 font-medium">ดูกราฟคะแนนความมีวินัยของตัวเองกันค่ะ</p>
-                                    
-                                    <div className="flex items-end justify-between h-56 gap-3 pt-4 border-t-2 border-slate-50">
-                                        {last7Days.map((dateStr, i) => {
-                                            const rec = allRecords[dateStr];
-                                            const score = computeScoreForRecord(rec);
-                                            const dayObj = new Date(dateStr);
-                                            const dayName = dayObj.toLocaleDateString('th-TH', {weekday: 'short'});
-                                            const isToday = dateStr === dateString;
-                                            
-                                            const finalScore = isToday ? dailyScore : score;
-                                            
-                                            return (
-                                                <div key={dateStr} className="flex flex-col items-center flex-1 gap-2 h-full">
-                                                    <span className={`text-[11px] font-black ${finalScore === 100 ? 'text-pink-500' : 'text-purple-400'}`}>{finalScore}%</span>
-                                                    <div className="w-full bg-slate-50 rounded-t-2xl relative flex items-end justify-center h-full border border-slate-100 overflow-hidden shadow-inner">
-                                                        <div className={`w-full rounded-t-2xl transition-all duration-1000 ${finalScore === 100 ? 'bg-gradient-to-t from-pink-400 to-purple-400' : 'bg-gradient-to-t from-purple-100 to-purple-50'}`} style={{height: `${finalScore}%`}}></div>
-                                                    </div>
-                                                    <span className={`text-[10px] ${isToday ? 'font-black text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg' : 'font-bold text-slate-400'}`}>{isToday ? 'วันนี้' : dayName}</span>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                </section>
-
-                                <section className="bg-white rounded-[32px] p-7 shadow-md border border-purple-50">
-                                    <h2 className="font-black text-sm text-slate-400 uppercase tracking-widest mb-5">🏆 สรุปภาพรวมหุ่นสวย</h2>
-                                    <div className="grid grid-cols-2 gap-5">
-                                        <div className="bg-slate-50 p-6 rounded-[24px] border border-slate-100 text-center shadow-sm">
-                                            <p className="text-[11px] text-slate-500 font-bold mb-2 uppercase tracking-wide">น้ำหนักปัจจุบัน</p>
-                                            <p className="text-4xl font-black text-slate-800">{weight.toFixed(1)} <span className="text-sm font-bold text-slate-400">กก.</span></p>
-                                        </div>
-                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-[24px] border border-purple-100 text-center shadow-sm">
-                                            <p className="text-[11px] text-purple-600 font-bold mb-2 uppercase tracking-wide">เป้าหมายลดอีก</p>
-                                            <p className="text-4xl font-black text-pink-500">{Math.max(0, weight - targetWeight).toFixed(1)} <span className="text-sm font-bold text-purple-400">กก.</span></p>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
-                        ) : null}
-                    </main>
+      <main className="px-5 mt-6 space-y-6">
+        
+        {activeTab === 'tracker' ? (
+          <>
+            {/* Daily Score Ring */}
+            <section className={`rounded-[24px] p-6 shadow-sm border flex items-center justify-between relative overflow-hidden transition-colors duration-500 ${dailyScore === 100 ? 'bg-purple-500 border-purple-400 text-white' : 'bg-white border-slate-100 text-slate-800'}`}>
+               <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full opacity-50 blur-xl ${dailyScore === 100 ? 'bg-purple-400' : 'bg-purple-50'}`}></div>
+              <div className="relative z-10 max-w-[60%]">
+                <h2 className={`font-extrabold text-lg mb-1 ${dailyScore === 100 ? 'text-white' : 'text-slate-800'}`}>พลังงานวันนี้</h2>
+                <p className={`text-sm font-bold leading-snug ${dailyScore === 100 ? 'text-purple-100' : 'text-slate-500'}`}>
+                  {getMotivationalMessage()}
+                </p>
+              </div>
+              <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
+                <svg className="w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
+                  <path className={dailyScore === 100 ? 'text-purple-400' : 'text-slate-100'} strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path className={`transition-all duration-1000 ease-out ${dailyScore === 100 ? 'text-white' : 'text-purple-500'}`} strokeDasharray={`${dailyScore}, 100`} strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className={`text-xl font-extrabold ${dailyScore === 100 ? 'text-white' : 'text-slate-800'}`}>{dailyScore}</span>
                 </div>
-            );
-        };
+              </div>
+            </section>
 
-        const MainContainer = () => {
-            const [user, setUser] = useState(null);
-            const [authLoading, setAuthLoading] = useState(true);
-            const [currentUser, setCurrentUser] = useState(() => window.localStorage.getItem('p45_current_profile'));
+            {/* Daily Reward Section */}
+            <section className={`rounded-[24px] p-5 shadow-sm border transition-all duration-500 ${dailyScore === 100 ? 'bg-gradient-to-r from-fuchsia-50 to-purple-100 border-purple-200 scale-[1.02]' : 'bg-slate-50 border-slate-100'}`}>
+               <div className="flex items-center gap-4">
+                 <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0 transition-all duration-500 ${dailyScore === 100 ? 'bg-purple-500 text-white shadow-lg shadow-purple-200' : 'bg-white text-slate-300 border border-slate-200'}`}>
+                   <Gift size={28} />
+                 </div>
+                 <div>
+                   <h3 className={`font-black text-sm uppercase tracking-wide ${dailyScore === 100 ? 'text-purple-800' : 'text-slate-400'}`}>
+                     {dailyScore === 100 ? '🎁 ปลดล็อกรางวัลคนเก่ง!' : 'ของรางวัลพิเศษรออยู่'}
+                   </h3>
+                   <p className={`text-xs mt-1.5 font-medium leading-relaxed ${dailyScore === 100 ? 'text-purple-700' : 'text-slate-500'}`}>
+                     {dailyScore === 100 
+                       ? `ยอดเยี่ยมมาก! วันนี้ได้สิทธิ์ทาน "${todayReward}" ให้รางวัลตัวเองเลยค่ะ 🎉`
+                       : 'ทำภารกิจทั้งหมดให้ครบ 100% เพื่อปลดล็อกอาหารของโปรดวันนี้!'}
+                   </p>
+                 </div>
+               </div>
+            </section>
 
-            useEffect(() => {
-                const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Auth error", error);
-                    }
-                };
-                initAuth();
+            {/* Meals Checklist */}
+             <section>
+               <h2 className="font-black text-slate-800 mb-3 px-1 flex items-center gap-2 uppercase tracking-wide text-sm">
+                 <Utensils size={18} className="text-purple-500"/>
+                 วินัยการกิน (40 Pts)
+               </h2>
+               <div className="grid gap-3">
+                {[
+                  { state: breakfastDone, setter: setBreakfastDone, icon: Coffee, title: 'มื้อเช้า', time: '10:00', desc: dailyPlan.meals.breakfast, color: 'fuchsia' },
+                  { state: lunchDone, setter: setLunchDone, icon: Sun, title: 'มื้อเที่ยง', time: '13:00', desc: dailyPlan.meals.lunch, color: 'purple' },
+                  { state: snackDone, setter: setSnackDone, icon: Coffee, title: 'มื้อว่าง', time: '16:00', desc: dailyPlan.meals.snack, color: 'violet' },
+                  { state: dinnerDone, setter: setDinnerDone, icon: Sunset, title: 'มื้อเย็น', time: '18:30', desc: dailyPlan.meals.dinner, color: 'indigo' }
+                ].map((meal, idx) => (
+                  <div 
+                    key={idx}
+                    onClick={() => meal.setter(!meal.state)} 
+                    className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${meal.state ? 'bg-white shadow-sm border border-slate-100 opacity-60' : 'bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1'}`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${meal.state ? `bg-${meal.color}-100 text-${meal.color}-500` : 'bg-slate-50 text-slate-400'}`}>
+                        <meal.icon size={20} />
+                      </div>
+                      <div>
+                        <h3 className={`font-extrabold text-sm transition-all ${meal.state ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>
+                          {meal.title} <span className="text-[10px] font-bold text-slate-400 ml-1 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{meal.time}</span>
+                        </h3>
+                        <p className={`text-xs mt-1 line-clamp-1 font-medium ${meal.state ? 'text-slate-400' : 'text-slate-500'}`}>{meal.desc}</p>
+                      </div>
+                    </div>
+                    <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${meal.state ? `border-${meal.color}-500 bg-${meal.color}-500 text-white` : 'border-slate-200'}`}>
+                      {meal.state && <CheckCircle size={14} className="stroke-[3] relative z-10" />}
+                    </div>
+                  </div>
+                ))}
+               </div>
+            </section>
 
-                const unsubscribe = onAuthStateChanged(auth, (u) => {
-                    setUser(u);
-                    setAuthLoading(false);
-                });
-                return () => unsubscribe();
-            }, []);
+            {/* Water Tracker */}
+            <section className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 relative overflow-hidden mt-6">
+               <div 
+                 className="absolute bottom-0 left-0 right-0 bg-blue-50/60 transition-all duration-700 -z-0"
+                 style={{ height: `${Math.min((water/targetWater)*100, 100)}%` }}
+               ></div>
+               
+               <div className="relative z-10">
+                 <div className="flex items-center gap-2 mb-4">
+                    <Droplet size={18} className="text-blue-500" />
+                    <h2 className="font-black text-slate-800 text-sm uppercase tracking-wide">เติมน้ำเข้าระบบ (20 Pts)</h2>
+                    <div className="ml-auto bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                      {water} / {targetWater} แก้ว
+                    </div>
+                  </div>
+                
+                <div className="flex items-center justify-center gap-6 mb-6">
+                  <button onClick={() => setWater(Math.max(0, water - 1))} className="w-12 h-12 rounded-[16px] bg-white border border-slate-200 flex items-center justify-center text-xl font-medium text-slate-500 active:scale-95 transition-transform">-</button>
+                  <div className="relative">
+                     <Droplet size={64} className={`${water >= targetWater ? 'text-blue-500' : 'text-slate-200'} transition-colors duration-500`} fill={water >= targetWater ? 'currentColor' : 'none'} strokeWidth={water >= targetWater ? 0 : 2} />
+                  </div>
+                  <button onClick={() => setWater(water + 1)} className="w-12 h-12 rounded-[16px] bg-blue-500 text-white flex items-center justify-center text-xl font-bold active:scale-95 shadow-lg shadow-blue-200 transition-transform">+</button>
+                </div>
+               </div>
+            </section>
 
-            const handleLogin = (name) => {
-                setCurrentUser(name);
-                window.localStorage.setItem('p45_current_profile', name);
-            };
+            {/* Exercise Checklist */}
+            <section className="mt-6">
+               <div className="mb-3 px-1">
+                 <h2 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-wide text-sm">
+                   <Flame size={18} className="text-emerald-500"/>
+                   ตารางฝึกวันนี้ (20 Pts)
+                 </h2>
+                 <p className="text-xs text-emerald-600 font-bold mt-1">เป้าหมายพิเศษ: <span className="bg-emerald-100 px-1.5 py-0.5 rounded">ลดต้นแขน & หน้าท้อง</span></p>
+               </div>
+               
+               <div className="grid gap-3">
+                {dailyPlan.exercises.map((ex, idx) => {
+                  const isDone = exerciseChecks[idx];
+                  const parts = ex.split('(');
+                  const title = parts[0].trim();
+                  const desc = parts.length > 1 ? '(' + parts[1] : '';
+                  
+                  return (
+                  <div 
+                    key={idx}
+                    onClick={() => toggleExercise(idx)} 
+                    className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${isDone ? 'bg-white shadow-sm border border-slate-100 opacity-60' : 'bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1'}`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isDone ? 'bg-emerald-100 text-emerald-500' : 'bg-slate-50 text-slate-400'}`}>
+                        <span className="font-black text-sm">{idx + 1}</span>
+                      </div>
+                      <div>
+                        <h3 className={`font-extrabold text-sm transition-all ${isDone ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>
+                          {title}
+                        </h3>
+                        <p className={`text-[11px] mt-0.5 font-medium ${isDone ? 'text-slate-400' : 'text-slate-500'}`}>
+                          {desc}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isDone ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200'}`}>
+                      {isDone && <CheckCircle size={14} className="stroke-[3] relative z-10" />}
+                    </div>
+                  </div>
+                )})}
+               </div>
+            </section>
 
-            const handleLogout = () => {
-                setCurrentUser(null);
-                window.localStorage.removeItem('p45_current_profile');
-            };
+            {/* Fasting & Knee Pain */}
+            <section className="grid grid-cols-2 gap-4 my-6">
+              <div 
+                onClick={() => setFastingSuccess(!fastingSuccess)} 
+                className={`p-4 rounded-[24px] border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between active:scale-95 ${fastingSuccess ? 'border-indigo-500 bg-indigo-50' : 'border-transparent bg-white shadow-sm hover:-translate-y-1'}`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fastingSuccess ? 'bg-indigo-500 text-white shadow-md shadow-indigo-200' : 'bg-slate-100 text-slate-500'}`}>
+                    <Moon size={20} />
+                  </div>
+                  <div className={`relative w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${fastingSuccess ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-200'}`}>
+                    {fastingSuccess && <CheckCircle size={12} className="stroke-[3] relative z-10" />}
+                  </div>
+                </div>
+                <div>
+                  <h3 className={`font-extrabold text-sm ${fastingSuccess ? 'text-indigo-800' : 'text-slate-800'}`}>งดมื้อดึก (IF)</h3>
+                  <p className="text-[10px] text-slate-500 font-bold mt-1">20 Pts • หลัง 19:00 น.</p>
+                </div>
+              </div>
 
-            if (authLoading) return <div className="min-h-screen bg-[#faf5ff] flex flex-col items-center justify-center text-purple-400"><div className="w-14 h-14 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin mb-4"></div><p className="font-bold text-base">กำลังโหลดตู้เซฟคนสวย... 🌸</p></div>;
-            if (!user || !currentUser) return <LoginScreen onLogin={handleLogin} />;
+              {/* Knee Pain Tracker */}
+              <div className="p-4 rounded-[24px] border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
+                 <h2 className="font-black text-xs text-slate-500 mb-2 uppercase flex items-center gap-1">
+                   <Activity size={12} className="text-purple-400"/> เช็คสภาพหัวเข่า
+                 </h2>
+                 <div className="flex justify-between gap-1 mt-auto">
+                    <button onClick={() => setKneePain('none')} className={`flex-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${kneePain === 'none' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
+                      <ThumbsUp size={16} />
+                      <span className="text-[9px] font-bold">ปกติ</span>
+                    </button>
+                    <button onClick={() => setKneePain('mild')} className={`flex-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${kneePain === 'mild' ? 'bg-yellow-400 text-yellow-900 shadow-md shadow-yellow-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
+                      <AlertCircle size={16} />
+                      <span className="text-[9px] font-bold">ตึงนิดๆ</span>
+                    </button>
+                 </div>
+              </div>
+            </section>
+          </>
+        ) : (
+          /* แท็บดูแผนการ (Plan Tab) */
+          <div className="space-y-6 animation-fade-in pb-10">
+            {/* เมนูอาหาร Timeline */}
+            <section className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <Utensils size={20} className="text-purple-500" />
+                  <h2 className="font-extrabold text-lg text-slate-800">แผนเสบียง: {dailyPlan.day}</h2>
+                </div>
+                <div className="bg-purple-50 text-purple-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wide">
+                  Convenience Mode
+                </div>
+              </div>
+              
+              <div className="space-y-6 relative ml-3">
+                 <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100 -z-10"></div>
+                 
+                {[
+                  { time: '10:00', meal: 'มื้อเช้า', desc: dailyPlan.meals.breakfast, icon: Coffee, color: 'bg-fuchsia-100 text-fuchsia-600', dot: 'border-fuchsia-400' },
+                  { time: '13:00', meal: 'มื้อเที่ยง', desc: dailyPlan.meals.lunch, icon: Sun, color: 'bg-purple-100 text-purple-600', dot: 'border-purple-400' },
+                  { time: '16:00', meal: 'มื้อว่าง', desc: dailyPlan.meals.snack, icon: Coffee, color: 'bg-violet-100 text-violet-600', dot: 'border-violet-400' },
+                  { time: '18:30', meal: 'มื้อเย็น', desc: dailyPlan.meals.dinner, icon: Sunset, color: 'bg-indigo-100 text-indigo-600', dot: 'border-indigo-400' }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex gap-4 items-start relative group">
+                    <div className={`w-8 h-8 rounded-full border-4 ${item.dot} bg-white flex items-center justify-center shrink-0 shadow-sm mt-1 -ml-1`}>
+                       <item.icon size={12} className="text-slate-400" />
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-[20px] flex-1 border border-transparent transition-colors shadow-sm">
+                      <div className="flex items-center gap-2 mb-1.5">
+                         <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${item.color}`}>{item.time}</span>
+                         <h3 className="font-extrabold text-slate-800 text-sm">{item.meal}</h3>
+                      </div>
+                      <p className="text-sm font-medium text-slate-500 leading-snug">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-            return <Dashboard user={user} profileName={currentUser} onLogout={handleLogout} />;
-        };
+              {/* ไอเดียเมนูสลับเปลี่ยน */}
+              <div className="mt-6 pt-5 border-t border-slate-100">
+                <h3 className="font-bold text-slate-700 text-xs uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                  <Star size={14} className="text-amber-500"/> ไอเดียเมนูร้านสะดวกซื้อ
+                </h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {convenienceStoreIdeas.map((idea, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-50">
+                      <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">{idea.type}</span>
+                      {idea.item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<MainContainer />);
-    </script>
-</body>
-</html>
+            {/* ท่าออกกำลังกาย */}
+            <section className="bg-slate-900 rounded-[24px] p-6 shadow-md border border-slate-800 mb-10 text-white relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500 opacity-20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4"></div>
+               
+               <div className="relative z-10">
+                 <div className="flex justify-between items-end mb-5">
+                   <div>
+                     <h2 className="font-black text-lg text-white flex items-center gap-2 tracking-wide uppercase">
+                       <Flame size={20} className="text-purple-400" />
+                       ตารางฝึกวันนี้
+                     </h2>
+                     <p className="text-xs font-bold text-emerald-400 mt-1 uppercase tracking-widest">{dailyPlan.type}</p>
+                   </div>
+                 </div>
+                
+                <div className="space-y-3">
+                  {dailyPlan.exercises.map((ex, idx) => {
+                    const isDone = exerciseChecks[idx];
+                    return (
+                    <div 
+                      key={idx} 
+                      onClick={() => toggleExercise(idx)}
+                      className={`flex items-center gap-3 p-3.5 rounded-[16px] border cursor-pointer transition-all ${isDone ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-white/10 border-white/5'}`}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shadow-md transition-colors ${isDone ? 'bg-emerald-500 text-white' : 'bg-purple-500 text-white'}`}>
+                        {isDone ? <CheckCircle size={16} strokeWidth={3} /> : idx + 1}
+                      </div>
+                      <span className={`text-sm font-bold transition-all ${isDone ? 'text-emerald-300 line-through decoration-emerald-500/50' : 'text-white/90'}`}>{ex}</span>
+                    </div>
+                  )})}
+                </div>
+                <div className="mt-5 p-4 bg-white/5 rounded-[16px] text-xs font-medium text-slate-300 flex items-start gap-3 border border-white/10 leading-relaxed">
+                  <AlertCircle size={18} className="shrink-0 text-purple-400 mt-0.5" />
+                  <p>ทำท่าละ 40 วินาที พัก 20 วินาที ทำวนให้ครบ 4 รอบ <strong className="text-white">ระวัง! หากเจ็บแปล๊บที่เข่าให้หยุดทำทันที</strong></p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
