@@ -1,763 +1,735 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Activity, 
-  Utensils, 
-  Droplet, 
-  CheckCircle, 
-  Moon, 
-  Flame,
-  ThumbsUp,
-  AlertCircle,
-  Calendar,
-  BookOpen,
-  Coffee,
-  Sun,
-  Sunset,
-  Trophy,
-  Target,
-  Scale,
-  Gift,
-  Star
-} from 'lucide-react';
-
-// --- Component พลุเฉลิมฉลอง (ธีมม่วง-ชมพู) ---
-const Confetti = () => {
-  return (
-    <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-      {Array.from({ length: 50 }).map((_, i) => {
-        const colors = ['#a855f7', '#d946ef', '#ec4899', '#8b5cf6', '#eab308', '#f472b6'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        const isCircle = Math.random() > 0.5;
-        
-        return (
-          <div
-            key={i}
-            className="absolute top-[-10%]"
-            style={{
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 10 + 5}px`,
-              height: `${Math.random() * 10 + 5}px`,
-              backgroundColor: randomColor,
-              borderRadius: isCircle ? '50%' : '4px',
-              animation: `confetti-fall ${Math.random() * 2.5 + 1.5}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
-              animationDelay: `${Math.random() * 0.5}s`,
-            }}
-          />
-        );
-      })}
-    </div>
-  );
-};
-
-// --- Component ตัวการ์ตูนผู้หญิง (แบบเคลื่อนไหวตามวัน) ---
-const TransformationAvatar = ({ weight, targetWeight, initialWeight, dayIndex }) => {
-  const progress = Math.max(0, Math.min(1, (initialWeight - weight) / (initialWeight - targetWeight)));
-  const bodyRx = 30 - (16 * progress);
-  const faceY = 26;
-
-  // กำหนดกิจกรรมตามวันในสัปดาห์: 0=อา, 1=จ, 2=อ, 3=พ, 4=พฤ, 5=ศ, 6=ส
-  // เพื่อให้ตรงกับแผนการซ้อม: จ,พ,ศ = คาดิโอ | อ,พฤ = เวท | ส,อา = ยืดเหยียด
-  const activities = ['stretch', 'cardio', 'strength', 'cardio', 'strength', 'cardio', 'stretch'];
-  const act = activities[dayIndex % 7] || 'idle';
-
-  // ข้อความให้กำลังใจเปลี่ยนตามกิจกรรม
-  let statusText = '';
-  if (progress >= 1) statusText = 'หุ่นปังแล้ว! 🎉';
-  else if (act === 'cardio') statusText = 'คาดิโอสู้ๆ! 🏃‍♀️';
-  else if (act === 'strength') statusText = 'เวทเทรนนิ่ง! 💪';
-  else if (act === 'stretch') statusText = 'วันพักยืดเหยียด 🧘‍♀️';
-
-  return (
-    <div className="relative w-28 h-28 flex items-center justify-center mx-2 group">
-      {/* ป้ายข้อความ */}
-      <div className="absolute -top-4 whitespace-nowrap bg-white/95 px-3 py-1 rounded-full text-[10px] font-black text-purple-600 shadow-md border border-purple-100 z-20 transition-all duration-500 animate-bounce">
-        {statusText}
-      </div>
-
-      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
-        <style>{`
-          /* จุดหมุนข้อต่อต่างๆ */
-          .origin-hip-l { transform-origin: 43px 65px; }
-          .origin-hip-r { transform-origin: 57px 65px; }
-          .origin-shoulder-l { transform-origin: 45px 42px; }
-          .origin-shoulder-r { transform-origin: 55px 42px; }
-          .origin-bottom { transform-origin: 50px 85px; }
-
-          /* แอนิเมชันลอยตัวพื้นฐาน */
-          @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
-          
-          /* แอนิเมชันสำหรับวัน Cardio (วิ่งย่ำเท้า) */
-          @keyframes run-leg-l { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(-10deg); } }
-          @keyframes run-leg-r { 0%, 100% { transform: translateY(-8px) rotate(-10deg); } 50% { transform: translateY(0px) rotate(0deg); } }
-          @keyframes run-arm-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(40deg); } }
-          @keyframes run-arm-r { 0%, 100% { transform: rotate(40deg); } 50% { transform: rotate(0deg); } }
-          
-          /* แอนิเมชันสำหรับวัน Strength (ยกดัมเบล) */
-          @keyframes curl-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(100deg); } }
-          @keyframes curl-r { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-100deg); } }
-
-          /* แอนิเมชันสำหรับวัน Stretch (ยืดตัวโยกซ้ายขวา) */
-          @keyframes sway { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
-
-          /* นำแอนิเมชันไปใช้กับคลาส */
-          .anim-float { animation: float 3s ease-in-out infinite; }
-          
-          .anim-run-leg-l { animation: run-leg-l 0.6s infinite; }
-          .anim-run-leg-r { animation: run-leg-r 0.6s infinite; }
-          .anim-run-arm-l { animation: run-arm-l 0.6s infinite; }
-          .anim-run-arm-r { animation: run-arm-r 0.6s infinite; }
-
-          .anim-curl-l { animation: curl-l 1.5s ease-in-out infinite; }
-          .anim-curl-r { animation: curl-r 1.5s ease-in-out infinite; }
-
-          .anim-sway { animation: sway 4s ease-in-out infinite; }
-        `}</style>
-        
-        {/* กลุ่มร่างกายทั้งหมด */}
-        <g className={`anim-float ${act === 'stretch' ? 'anim-sway origin-bottom' : ''}`}>
-          
-          {/* ผมด้านหลัง */}
-          <path d="M 36 26 C 20 40, 30 70, 40 75 C 50 78, 60 78, 60 75 C 70 70, 80 40, 64 26 Z" fill="#3f271d" />
-
-          {/* ขาซ้าย */}
-          <g className={`origin-hip-l ${act === 'cardio' ? 'anim-run-leg-l' : ''}`}>
-            <line x1="43" y1="65" x2="43" y2="85" stroke="#fcd5ce" strokeWidth="4.5" strokeLinecap="round" />
-            <ellipse cx="41" cy="86" rx="5" ry="3.5" fill="#c084fc" />
-          </g>
-          {/* ขาขวา */}
-          <g className={`origin-hip-r ${act === 'cardio' ? 'anim-run-leg-r' : ''}`}>
-            <line x1="57" y1="65" x2="57" y2="85" stroke="#fcd5ce" strokeWidth="4.5" strokeLinecap="round" />
-            <ellipse cx="59" cy="86" rx="5" ry="3.5" fill="#c084fc" />
-          </g>
-
-          {/* แขนซ้าย (วาดก่อนชุดเดรสเพื่อให้อยู่ด้านหลังลำตัว) */}
-          <g className={`origin-shoulder-l ${act === 'cardio' ? 'anim-run-arm-l' : act === 'strength' ? 'anim-curl-l' : ''}`}>
-            {act === 'stretch' ? (
-              // ท่ายืดแขนชูขึ้น
-              <line x1="45" y1="42" x2="35" y2="15" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" />
-            ) : (
-              // ท่าแขนแนบลำตัวปกติ
-              <line x1="45" y1="42" x2={50 - bodyRx - 3} y2="58" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" className="transition-all duration-700 ease-out" />
-            )}
-            {/* ดัมเบลที่มือซ้าย */}
-            {act === 'strength' && (
-              <g transform={`translate(${50 - bodyRx - 3}, 58)`}>
-                <line x1="-4" y1="0" x2="4" y2="0" stroke="#cbd5e1" strokeWidth="2" />
-                <circle cx="-4" cy="0" r="3" fill="#ec4899" />
-                <circle cx="4" cy="0" r="3" fill="#ec4899" />
-              </g>
-            )}
-          </g>
-
-          {/* ชุดเดรสทรงเอ สีม่วง */}
-          <path d={`M 41 38 L 59 38 L ${50 + bodyRx} 68 Q 50 72 ${50 - bodyRx} 68 Z`} fill="#a855f7" className="transition-all duration-700 ease-out" />
-          {/* ลายคาดเอวเดรส */}
-          <path d={`M ${50 - bodyRx*0.65} 48 Q 50 51 ${50 + bodyRx*0.65} 48`} fill="none" stroke="#7e22ce" strokeWidth="2.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
-
-          {/* แขนขวา (วาดหลังชุดเดรสเพื่อให้อยู่ด้านหน้าลำตัว) */}
-          <g className={`origin-shoulder-r ${act === 'cardio' ? 'anim-run-arm-r' : act === 'strength' ? 'anim-curl-r' : ''}`}>
-            {act === 'stretch' ? (
-              // ท่ายืดแขนชูขึ้น
-              <line x1="55" y1="42" x2="65" y2="15" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" />
-            ) : (
-              // ท่าแขนแนบลำตัวปกติ
-              <line x1="55" y1="42" x2={50 + bodyRx + 3} y2="58" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" className="transition-all duration-700 ease-out" />
-            )}
-            {/* ดัมเบลที่มือขวา */}
-            {act === 'strength' && (
-              <g transform={`translate(${50 + bodyRx + 3}, 58)`}>
-                <line x1="-4" y1="0" x2="4" y2="0" stroke="#cbd5e1" strokeWidth="2" />
-                <circle cx="-4" cy="0" r="3" fill="#ec4899" />
-                <circle cx="4" cy="0" r="3" fill="#ec4899" />
-              </g>
-            )}
-          </g>
-
-          {/* ศีรษะและใบหน้า */}
-          <circle cx="50" cy={faceY} r="14" fill="#fcd5ce" />
-          <path d="M 35 25 Q 50 5 65 25 Q 50 15 35 25" fill="#3f271d" />
-          <path d="M 36 28 Q 40 18 52 18 Q 45 22 36 28" fill="#5c3a21" />
-          
-          {/* โบว์ติดผม */}
-          <path d="M 62 10 L 68 5 L 67 14 Z" fill="#e879f9" />
-          <path d="M 62 10 L 56 5 L 57 14 Z" fill="#e879f9" />
-          <circle cx="62" cy="10" r="2.5" fill="#d946ef" />
-
-          {/* แก้ม */}
-          <circle cx="42" cy={faceY + 4} r="3" fill="#ffa6c9" opacity="0.8" />
-          <circle cx="58" cy={faceY + 4} r="3" fill="#ffa6c9" opacity="0.8" />
-
-          {/* ดวงตาเปลี่ยนตามการออกกำลังกาย */}
-          {act === 'strength' || act === 'cardio' ? (
-             // หลับตาปี๋เหนื่อย/ตั้งใจ
-             <g>
-                <path d="M 42 27 Q 44 26 46 27" fill="none" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M 54 27 Q 56 26 58 27" fill="none" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" />
-             </g>
-          ) : (
-             // ตาแป๋วปกติ
-             <g>
-                <circle cx="44" cy={faceY + 1} r="2.5" fill="#1e293b" />
-                <circle cx="56" cy={faceY + 1} r="2.5" fill="#1e293b" />
-                <circle cx="44.5" cy={faceY} r="1" fill="#ffffff" />
-                <circle cx="56.5" cy={faceY} r="1" fill="#ffffff" />
-             </g>
-          )}
-
-          {/* ปากเปลี่ยนตามการออกกำลังกาย */}
-          {act === 'strength' ? (
-            // ปากกัดฟันสู้ (เส้นตรง)
-            <line x1="48" y1="32" x2="52" y2="32" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" />
-          ) : act === 'cardio' ? (
-            // อ้าปากหอบเหนื่อย
-            <circle cx="50" cy="32" r="1.5" fill="#7e22ce" />
-          ) : (
-            // ยิ้มสวยๆ
-            <path d="M 48 31 Q 50 33 52 31" fill="none" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" />
-          )}
-
-          {/* เอฟเฟกต์พิเศษเมื่อเป้าหมายสำเร็จ */}
-          {progress >= 1 && (
-            <g>
-              <path d="M 47 30 Q 50 35 53 30" fill="#a855f7" stroke="#7e22ce" strokeWidth="1" strokeLinecap="round" />
-              <g className="text-yellow-400">
-                <path d="M 28 15 L 30 20 L 35 22 L 30 24 L 28 29 L 26 24 L 21 22 L 26 20 Z" fill="currentColor" />
-                <path d="M 75 45 L 76 48 L 79 49 L 76 50 L 75 53 L 74 50 L 71 49 L 74 48 Z" fill="currentColor" />
-              </g>
-            </g>
-          )}
-        </g>
-      </svg>
-    </div>
-  );
-};
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState('tracker'); 
-  const [weight, setWeight] = useState(52.0);
-  const [water, setWater] = useState(0);
-  
-  const [breakfastDone, setBreakfastDone] = useState(false);
-  const [lunchDone, setLunchDone] = useState(false);
-  const [snackDone, setSnackDone] = useState(false);
-  const [dinnerDone, setDinnerDone] = useState(false);
-  const [exerciseChecks, setExerciseChecks] = useState([false, false, false, false]);
-  const [fastingSuccess, setFastingSuccess] = useState(false);
-  const [kneePain, setKneePain] = useState(null); 
-  
-  const [showConfetti, setShowConfetti] = useState(false);
-
-  const targetWater = 8;
-  const targetWeight = 45.0;
-  const initialWeight = 52.0;
-
-  // หาวันที่และดัชนีวันในสัปดาห์ปัจจุบัน
-  const today = new Date();
-  const dayIndex = today.getDay(); // 0 = วันอาทิตย์, 1 = วันจันทร์, ...
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const dateString = today.toLocaleDateString('th-TH', options);
-
-  const planStartDate = new Date(2026, 4, 27); 
-  const diffTime = today.getTime() - planStartDate.getTime();
-  const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1); 
-  const totalDays = 60; 
-  const overallProgress = Math.min(Math.round((diffDays / totalDays) * 100), 100);
-
-  // ระบบเตือนวันชั่งน้ำหนัก
-  const weighInFrequency = 7; 
-  const currentCycleDay = diffDays > 0 ? (diffDays - 1) % weighInFrequency : 0;
-  const isWeighInDay = currentCycleDay === 0 && diffDays > 0;
-  const daysUntilNextWeighIn = diffDays > 0 ? weighInFrequency - currentCycleDay : Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
-  
-  const nextWeighInDate = new Date(today);
-  if (diffDays <= 0) {
-      nextWeighInDate.setTime(planStartDate.getTime());
-  } else if (!isWeighInDay) {
-      nextWeighInDate.setDate(today.getDate() + daysUntilNextWeighIn);
-  }
-  const nextWeighInString = nextWeighInDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-
-  const toggleExercise = (index) => {
-    const newChecks = [...exerciseChecks];
-    newChecks[index] = !newChecks[index];
-    setExerciseChecks(newChecks);
-  };
-
-  // คำนวณคะแนน
-  let dailyScore = 0;
-  if (breakfastDone) dailyScore += 10;
-  if (lunchDone) dailyScore += 10;
-  if (snackDone) dailyScore += 10;
-  if (dinnerDone) dailyScore += 10;
-  if (water >= targetWater) dailyScore += 20;
-  
-  const completedExercises = exerciseChecks.filter(Boolean).length;
-  dailyScore += (completedExercises / 4) * 20;
-  if (fastingSuccess) dailyScore += 20;
-  dailyScore = Math.min(Math.round(dailyScore), 100);
-
-  useEffect(() => {
-    if (dailyScore === 100) {
-      setShowConfetti(true);
-      const timer = setTimeout(() => setShowConfetti(false), 5000);
-      return () => clearTimeout(timer);
-    } else {
-      setShowConfetti(false);
-    }
-  }, [dailyScore]);
-
-  const getMotivationalMessage = () => {
-    if (dailyScore === 100) return "ภารกิจสำเร็จ! เลื่อนลงไปรับรางวัลด้านล่างเลย 🎁";
-    if (dailyScore >= 70) return "ใกล้ได้รางวัลแล้ว อย่าเพิ่งยอมแพ้! 💪";
-    if (dailyScore >= 40) return "มาถูกทางแล้ว ลุยต่อเลย! 🏃‍♀️";
-    return "พร้อมรับความท้าทายของวันนี้หรือยัง? 🎯";
-  };
-
-  const rewardsList = [
-    "ส้มตำแซ่บๆ 1 จาน (สั่งลดหวาน/เค็มลงนิดนึงเพื่อสุขภาพ)",
-    "ทุเรียนพูเล็กๆ 1 พู (ให้พอชื่นใจ)",
-    "แซลมอนซาชิมิฟินๆ 1 ชุด",
-    "ก๋วยเตี๋ยวชามโปรด 1 ชาม (อร่อยได้แต่งดซดน้ำซุปเยอะน้า)",
-    "จิ้มจุ่มมื้อเย็นฟินๆ (เน้นผักและเนื้อสัตว์ไม่ติดมัน)",
-    "ผลไม้สดแช่เย็นฉ่ำๆ (แตงโม หรือ ชมพู่)",
-    "เมี่ยงปลาเผาตัวโตๆ (เน้นกินผักเยอะๆ)",
-    "เงาะ หรือ มะขามหวาน พอให้หายอยาก",
-    "อาหารอีสาน 1 อย่างที่อยากกิน (เช่น น้ำตกหมู หรือ ลาบ)",
-    "ฝรั่ง มะละกอ หรือ พุทรา กรอบๆ เย็นๆ"
-  ];
-  const todayReward = rewardsList[diffDays % rewardsList.length];
-
-  const dailyPlan = {
-    day: 'วันนี้',
-    type: 'Arm & Core Focus (Low-Impact)',
-    meals: {
-      breakfast: 'ไข่ต้ม 2 ฟอง + นมดีน่าดีไลท์ (สูตรน้ำตาลน้อย) หรือ นมโปรตีนสูง',
-      lunch: 'ข้าวไรซ์เบอร์รี่ (กล่อง) + อกไก่นุ่ม (ในร้านสะดวกซื้อ) + ผักสลัด 1 ซอง',
-      snack: 'แอปเปิ้ลหั่นชิ้น (เตรียมจากบ้าน) หรือ อัลมอนด์ 1 ซองเล็ก',
-      dinner: 'สลัดโรลปูอัด (ซื้อจากตลาด/ร้าน) + น้ำสลัดซีฟู้ด (แตะนิดหน่อย)'
-    },
-    exercises: [
-      'ชกมวยอากาศแบบเกร็งแขน (Arm Punches) (40 วินาที)',
-      'หมุนแขนเป็นวงกลมเล็กๆ เร็วๆ (Arm Circles) (40 วินาที)',
-      'วิดพื้นดันกำแพง (Wall Push-ups) (40 วินาที)',
-      'สะพานโค้ง (Glute Bridge) (40 วินาที)' 
-    ]
-  };
-
-  const convenienceStoreIdeas = [
-    { type: 'เช้า', item: 'แซนวิชโฮลวีตทูน่า + อเมริกาโน่ไม่หวาน' },
-    { type: 'เช้า', item: 'กล้วยหอม 1 ลูก + ไข่ตุ๋นคัพ' },
-    { type: 'เที่ยง', item: 'ข้าวกล้อง + ปลาซาบะย่าง (สูตรโซเดียมต่ำ)' },
-    { type: 'เที่ยง', item: 'เกี๊ยวกุ้งน้ำ (ไม่ซดน้ำซุป) + ไข่ต้ม 1 ฟอง' },
-    { type: 'ว่าง', item: 'กรีกโยเกิร์ต (รสธรรมชาติ) + ถั่วแระญี่ปุ่น' },
-    { type: 'เย็น', item: 'ยำวุ้นเส้น (สำเร็จรูป) + อกไก่ฉีก' },
-  ];
-
-  return (
-    <div className="min-h-screen bg-[#FDFBF7] text-slate-800 font-sans pb-24 selection:bg-purple-200">
-      <style>{`
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Project 45: Pattamapron's Challenge</title>
+    
+    <!-- PWA: โค้ดทำแอปเต็มจอมือถือ -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#FDFBF7">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #FDFBF7; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes confetti-fall {
           0% { transform: translateY(0) rotate(0deg); opacity: 1; }
           100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
-      `}</style>
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-      {showConfetti && <Confetti />}
-
-      {/* 🚀 Header สีม่วงอมชมพูสุดพรีเมียม */}
-      <header className="relative bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-500 p-6 pb-14 rounded-b-[40px] shadow-md overflow-hidden text-white">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl -translate-y-1/3 translate-x-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-black opacity-10 rounded-full blur-xl translate-y-1/3 -translate-x-1/4"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
         
-        <div className="relative z-10">
-          <div className="flex justify-between items-start mb-1">
-            <div>
-              <p className="text-white/90 font-black text-[11px] tracking-[0.2em] uppercase mb-1 flex items-center gap-1.5">
-                <Flame size={14} className="text-yellow-300" fill="currentColor"/> 
-                Flexible Fit & Firm
-              </p>
-              <h1 className="text-4xl font-black tracking-tight leading-none mb-1 uppercase drop-shadow-md text-white">
-                Project <span className="text-pink-300">45</span>
-              </h1>
-              <h2 className="text-lg font-bold text-white/90 tracking-wide mt-1">
-                Pattamapron's Challenge
-              </h2>
-            </div>
-            <div className="bg-black/20 p-2.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20">
-              <Target size={24} className="text-white"/>
-            </div>
-          </div>
-          <p className="text-white/80 font-medium text-xs mt-3 flex items-center gap-1.5">
-            <Calendar size={14} /> {dateString}
-          </p>
-        </div>
-      </header>
+        // --- 🎨 ระบบไอคอนฝังในตัว (หมดปัญหาจอดำ 100%) ---
+        const IconBase = ({ size=24, className="", strokeWidth=2, fill="none", children }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+        const Activity = (p) => <IconBase {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></IconBase>;
+        const Utensils = (p) => <IconBase {...p}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></IconBase>;
+        const Droplet = (p) => <IconBase {...p}><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></IconBase>;
+        const CheckCircle = (p) => <IconBase {...p}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></IconBase>;
+        const Moon = (p) => <IconBase {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></IconBase>;
+        const Flame = (p) => <IconBase {...p}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></IconBase>;
+        const ThumbsUp = (p) => <IconBase {...p}><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></IconBase>;
+        const AlertCircle = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></IconBase>;
+        const Calendar = (p) => <IconBase {...p}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></IconBase>;
+        const BookOpen = (p) => <IconBase {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></IconBase>;
+        const Coffee = (p) => <IconBase {...p}><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></IconBase>;
+        const Sun = (p) => <IconBase {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></IconBase>;
+        const Sunset = (p) => <IconBase {...p}><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></IconBase>;
+        const Trophy = (p) => <IconBase {...p}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 1-12 0V2Z"/></IconBase>;
+        const Target = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></IconBase>;
+        const Scale = (p) => <IconBase {...p}><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></IconBase>;
+        const Gift = (p) => <IconBase {...p}><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" x2="12" y1="22" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></IconBase>;
+        const Star = (p) => <IconBase {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconBase>;
 
-      {/* Floating Status Cards */}
-      <div className="px-5 -mt-10 relative z-20 space-y-4">
-        
-        {/* Main Goal Card */}
-        <div className="bg-white rounded-[24px] p-5 shadow-xl shadow-purple-100/40 border border-purple-50 flex flex-col">
-          <div className="mb-3">
-            {isWeighInDay ? (
-              <div className="bg-purple-50 text-purple-600 text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-purple-100 animate-pulse shadow-sm">
-                  <Scale size={14} /> วันนี้คือวันชั่งน้ำหนัก! อัปเดตตัวเลขเลย
-              </div>
-            ) : (
-              <div className="bg-slate-50 text-slate-500 text-[10px] font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-slate-100">
-                  <Scale size={12} /> ชั่งน้ำหนักครั้งต่อไปใน {daysUntilNextWeighIn} วัน ({nextWeighInString})
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex flex-col z-10 shrink-0">
-               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
-                 <Target size={12} className="text-purple-500"/> เป้าหมาย: 45.0 กก.
-               </span>
-               <div className="flex items-baseline gap-1">
-                 <span className="text-4xl font-extrabold text-slate-800 tracking-tighter">{weight.toFixed(1)}</span>
-                 <span className="text-slate-500 font-bold">กก.</span>
-               </div>
-            </div>
-            
-            <div className="flex-1 flex justify-center">
-               {/* ส่งค่า dayIndex ให้ Component ทราบว่าเป็นวันไหน */}
-               <TransformationAvatar weight={weight} targetWeight={targetWeight} initialWeight={initialWeight} dayIndex={dayIndex} />
-            </div>
-
-            <div className="flex flex-col gap-1.5 bg-slate-50 p-1.5 rounded-[16px] border border-slate-100 z-10 shrink-0">
-               <button onClick={() => setWeight(prev => Number((prev + 0.1).toFixed(1)))} className="w-8 h-8 bg-white rounded-[10px] flex items-center justify-center text-slate-400 font-bold text-xl shadow-sm border border-slate-100 active:scale-95 transition-transform leading-none">+</button>
-               <button onClick={() => setWeight(prev => Math.max(40, Number((prev - 0.1).toFixed(1))))} className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-[10px] flex items-center justify-center text-white font-bold text-xl shadow-md shadow-emerald-200 active:scale-95 transition-transform leading-none">-</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Challenge Progress */}
-        <div className="bg-white rounded-[24px] p-5 shadow-lg shadow-purple-100/30 border border-slate-50">
-           <div className="flex justify-between items-center mb-3">
-             <div className="flex items-center gap-2">
-               <Trophy size={18} className="text-amber-500" />
-               <h3 className="font-bold text-slate-700 text-sm">ความสำเร็จของแคมเปญ</h3>
-             </div>
-             <span className="text-xs font-black text-slate-400">วันที่ {diffDays > 0 ? diffDays : '0'} / 60</span>
-           </div>
-           
-           <div className="relative w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-2">
-              <div 
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-400 via-fuchsia-500 to-purple-600 rounded-full transition-all duration-1000 ease-out" 
-                style={{ width: `${overallProgress}%` }}
-              ></div>
-           </div>
-           <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-             <span>Start</span>
-             <span className="text-purple-500">{overallProgress}%</span>
-             <span>Goal</span>
-           </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex justify-center gap-3 mt-8 px-5">
-        <button 
-          onClick={() => setActiveTab('tracker')}
-          className={`flex-1 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'tracker' ? 'bg-slate-900 text-white shadow-xl shadow-slate-300 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
-        >
-          <Flame size={18} className={activeTab === 'tracker' ? 'text-purple-400' : ''} />
-          เช็คลิสต์วันนี้
-        </button>
-        <button 
-          onClick={() => setActiveTab('plan')}
-          className={`flex-1 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'plan' ? 'bg-slate-900 text-white shadow-xl shadow-slate-300 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
-        >
-          <BookOpen size={18} className={activeTab === 'plan' ? 'text-fuchsia-400' : ''} />
-          แผนปฏิบัติการ
-        </button>
-      </div>
-
-      <main className="px-5 mt-6 space-y-6">
-        
-        {activeTab === 'tracker' ? (
-          <>
-            {/* Daily Score Ring */}
-            <section className={`rounded-[24px] p-6 shadow-sm border flex items-center justify-between relative overflow-hidden transition-colors duration-500 ${dailyScore === 100 ? 'bg-purple-500 border-purple-400 text-white' : 'bg-white border-slate-100 text-slate-800'}`}>
-               <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full opacity-50 blur-xl ${dailyScore === 100 ? 'bg-purple-400' : 'bg-purple-50'}`}></div>
-              <div className="relative z-10 max-w-[60%]">
-                <h2 className={`font-extrabold text-lg mb-1 ${dailyScore === 100 ? 'text-white' : 'text-slate-800'}`}>พลังงานวันนี้</h2>
-                <p className={`text-sm font-bold leading-snug ${dailyScore === 100 ? 'text-purple-100' : 'text-slate-500'}`}>
-                  {getMotivationalMessage()}
-                </p>
-              </div>
-              <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
-                <svg className="w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
-                  <path className={dailyScore === 100 ? 'text-purple-400' : 'text-slate-100'} strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path className={`transition-all duration-1000 ease-out ${dailyScore === 100 ? 'text-white' : 'text-purple-500'}`} strokeDasharray={`${dailyScore}, 100`} strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-                <div className="absolute flex flex-col items-center justify-center">
-                  <span className={`text-xl font-extrabold ${dailyScore === 100 ? 'text-white' : 'text-slate-800'}`}>{dailyScore}</span>
-                </div>
-              </div>
-            </section>
-
-            {/* Daily Reward Section */}
-            <section className={`rounded-[24px] p-5 shadow-sm border transition-all duration-500 ${dailyScore === 100 ? 'bg-gradient-to-r from-fuchsia-50 to-purple-100 border-purple-200 scale-[1.02]' : 'bg-slate-50 border-slate-100'}`}>
-               <div className="flex items-center gap-4">
-                 <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0 transition-all duration-500 ${dailyScore === 100 ? 'bg-purple-500 text-white shadow-lg shadow-purple-200' : 'bg-white text-slate-300 border border-slate-200'}`}>
-                   <Gift size={28} />
-                 </div>
-                 <div>
-                   <h3 className={`font-black text-sm uppercase tracking-wide ${dailyScore === 100 ? 'text-purple-800' : 'text-slate-400'}`}>
-                     {dailyScore === 100 ? '🎁 ปลดล็อกรางวัลคนเก่ง!' : 'ของรางวัลพิเศษรออยู่'}
-                   </h3>
-                   <p className={`text-xs mt-1.5 font-medium leading-relaxed ${dailyScore === 100 ? 'text-purple-700' : 'text-slate-500'}`}>
-                     {dailyScore === 100 
-                       ? `ยอดเยี่ยมมาก! วันนี้ได้สิทธิ์ทาน "${todayReward}" ให้รางวัลตัวเองเลยค่ะ 🎉`
-                       : 'ทำภารกิจทั้งหมดให้ครบ 100% เพื่อปลดล็อกอาหารของโปรดวันนี้!'}
-                   </p>
-                 </div>
-               </div>
-            </section>
-
-            {/* Meals Checklist */}
-             <section>
-               <h2 className="font-black text-slate-800 mb-3 px-1 flex items-center gap-2 uppercase tracking-wide text-sm">
-                 <Utensils size={18} className="text-purple-500"/>
-                 วินัยการกิน (40 Pts)
-               </h2>
-               <div className="grid gap-3">
-                {[
-                  { state: breakfastDone, setter: setBreakfastDone, icon: Coffee, title: 'มื้อเช้า', time: '10:00', desc: dailyPlan.meals.breakfast, color: 'fuchsia' },
-                  { state: lunchDone, setter: setLunchDone, icon: Sun, title: 'มื้อเที่ยง', time: '13:00', desc: dailyPlan.meals.lunch, color: 'purple' },
-                  { state: snackDone, setter: setSnackDone, icon: Coffee, title: 'มื้อว่าง', time: '16:00', desc: dailyPlan.meals.snack, color: 'violet' },
-                  { state: dinnerDone, setter: setDinnerDone, icon: Sunset, title: 'มื้อเย็น', time: '18:30', desc: dailyPlan.meals.dinner, color: 'indigo' }
-                ].map((meal, idx) => (
-                  <div 
-                    key={idx}
-                    onClick={() => meal.setter(!meal.state)} 
-                    className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${meal.state ? 'bg-white shadow-sm border border-slate-100 opacity-60' : 'bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1'}`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${meal.state ? `bg-${meal.color}-100 text-${meal.color}-500` : 'bg-slate-50 text-slate-400'}`}>
-                        <meal.icon size={20} />
-                      </div>
-                      <div>
-                        <h3 className={`font-extrabold text-sm transition-all ${meal.state ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>
-                          {meal.title} <span className="text-[10px] font-bold text-slate-400 ml-1 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{meal.time}</span>
-                        </h3>
-                        <p className={`text-xs mt-1 line-clamp-1 font-medium ${meal.state ? 'text-slate-400' : 'text-slate-500'}`}>{meal.desc}</p>
-                      </div>
-                    </div>
-                    <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${meal.state ? `border-${meal.color}-500 bg-${meal.color}-500 text-white` : 'border-slate-200'}`}>
-                      {meal.state && <CheckCircle size={14} className="stroke-[3] relative z-10" />}
-                    </div>
-                  </div>
-                ))}
-               </div>
-            </section>
-
-            {/* Water Tracker */}
-            <section className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 relative overflow-hidden mt-6">
-               <div 
-                 className="absolute bottom-0 left-0 right-0 bg-blue-50/60 transition-all duration-700 -z-0"
-                 style={{ height: `${Math.min((water/targetWater)*100, 100)}%` }}
-               ></div>
-               
-               <div className="relative z-10">
-                 <div className="flex items-center gap-2 mb-4">
-                    <Droplet size={18} className="text-blue-500" />
-                    <h2 className="font-black text-slate-800 text-sm uppercase tracking-wide">เติมน้ำเข้าระบบ (20 Pts)</h2>
-                    <div className="ml-auto bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-                      {water} / {targetWater} แก้ว
-                    </div>
-                  </div>
+        // --- Component พลุเฉลิมฉลอง ---
+        const Confetti = () => {
+          return (
+            <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+              {Array.from({ length: 50 }).map((_, i) => {
+                const colors = ['#a855f7', '#d946ef', '#ec4899', '#8b5cf6', '#eab308', '#f472b6'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                const isCircle = Math.random() > 0.5;
                 
-                <div className="flex items-center justify-center gap-6 mb-6">
-                  <button onClick={() => setWater(Math.max(0, water - 1))} className="w-12 h-12 rounded-[16px] bg-white border border-slate-200 flex items-center justify-center text-xl font-medium text-slate-500 active:scale-95 transition-transform">-</button>
-                  <div className="relative">
-                     <Droplet size={64} className={`${water >= targetWater ? 'text-blue-500' : 'text-slate-200'} transition-colors duration-500`} fill={water >= targetWater ? 'currentColor' : 'none'} strokeWidth={water >= targetWater ? 0 : 2} />
-                  </div>
-                  <button onClick={() => setWater(water + 1)} className="w-12 h-12 rounded-[16px] bg-blue-500 text-white flex items-center justify-center text-xl font-bold active:scale-95 shadow-lg shadow-blue-200 transition-transform">+</button>
-                </div>
-               </div>
-            </section>
+                return (
+                  <div
+                    key={i}
+                    className="absolute top-[-10%]"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      width: `${Math.random() * 10 + 5}px`,
+                      height: `${Math.random() * 10 + 5}px`,
+                      backgroundColor: randomColor,
+                      borderRadius: isCircle ? '50%' : '4px',
+                      animation: `confetti-fall ${Math.random() * 2.5 + 1.5}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+                      animationDelay: `${Math.random() * 0.5}s`,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          );
+        };
 
-            {/* Exercise Checklist */}
-            <section className="mt-6">
-               <div className="mb-3 px-1">
-                 <h2 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-wide text-sm">
-                   <Flame size={18} className="text-emerald-500"/>
-                   ตารางฝึกวันนี้ (20 Pts)
-                 </h2>
-                 <p className="text-xs text-emerald-600 font-bold mt-1">เป้าหมายพิเศษ: <span className="bg-emerald-100 px-1.5 py-0.5 rounded">ลดต้นแขน & หน้าท้อง</span></p>
-               </div>
-               
-               <div className="grid gap-3">
-                {dailyPlan.exercises.map((ex, idx) => {
-                  const isDone = exerciseChecks[idx];
-                  const parts = ex.split('(');
-                  const title = parts[0].trim();
-                  const desc = parts.length > 1 ? '(' + parts[1] : '';
+        // --- Component ตัวการ์ตูนผู้หญิง (แบบเคลื่อนไหวตามวัน) ---
+        const TransformationAvatar = ({ weight, targetWeight, initialWeight, dayIndex }) => {
+          const progress = Math.max(0, Math.min(1, (initialWeight - weight) / (initialWeight - targetWeight)));
+          const bodyRx = 30 - (16 * progress);
+          const faceY = 26;
+
+          const activities = ['stretch', 'cardio', 'strength', 'cardio', 'strength', 'cardio', 'stretch'];
+          const act = activities[dayIndex % 7] || 'idle';
+
+          let statusText = '';
+          if (progress >= 1) statusText = 'หุ่นปังแล้ว! 🎉';
+          else if (act === 'cardio') statusText = 'คาดิโอสู้ๆ! 🏃‍♀️';
+          else if (act === 'strength') statusText = 'เวทเทรนนิ่ง! 💪';
+          else if (act === 'stretch') statusText = 'วันพักยืดเหยียด 🧘‍♀️';
+
+          return (
+            <div className="relative w-28 h-28 flex items-center justify-center mx-2 group">
+              <div className="absolute -top-4 whitespace-nowrap bg-white/95 px-3 py-1 rounded-full text-[10px] font-black text-purple-600 shadow-md border border-purple-100 z-20 transition-all duration-500 animate-bounce">
+                {statusText}
+              </div>
+
+              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
+                <style>{`
+                  .origin-hip-l { transform-origin: 43px 65px; }
+                  .origin-hip-r { transform-origin: 57px 65px; }
+                  .origin-shoulder-l { transform-origin: 45px 42px; }
+                  .origin-shoulder-r { transform-origin: 55px 42px; }
+                  .origin-bottom { transform-origin: 50px 85px; }
+                  @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+                  @keyframes run-leg-l { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(-10deg); } }
+                  @keyframes run-leg-r { 0%, 100% { transform: translateY(-8px) rotate(-10deg); } 50% { transform: translateY(0px) rotate(0deg); } }
+                  @keyframes run-arm-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(40deg); } }
+                  @keyframes run-arm-r { 0%, 100% { transform: rotate(40deg); } 50% { transform: rotate(0deg); } }
+                  @keyframes curl-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(100deg); } }
+                  @keyframes curl-r { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-100deg); } }
+                  @keyframes sway { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+                  .anim-float { animation: float 3s ease-in-out infinite; }
+                  .anim-run-leg-l { animation: run-leg-l 0.6s infinite; }
+                  .anim-run-leg-r { animation: run-leg-r 0.6s infinite; }
+                  .anim-run-arm-l { animation: run-arm-l 0.6s infinite; }
+                  .anim-run-arm-r { animation: run-arm-r 0.6s infinite; }
+                  .anim-curl-l { animation: curl-l 1.5s ease-in-out infinite; }
+                  .anim-curl-r { animation: curl-r 1.5s ease-in-out infinite; }
+                  .anim-sway { animation: sway 4s ease-in-out infinite; }
+                `}</style>
+                
+                <g className={`anim-float ${act === 'stretch' ? 'anim-sway origin-bottom' : ''}`}>
+                  <path d="M 36 26 C 20 40, 30 70, 40 75 C 50 78, 60 78, 60 75 C 70 70, 80 40, 64 26 Z" fill="#3f271d" />
+
+                  <g className={`origin-hip-l ${act === 'cardio' ? 'anim-run-leg-l' : ''}`}>
+                    <line x1="43" y1="65" x2="43" y2="85" stroke="#fcd5ce" strokeWidth="4.5" strokeLinecap="round" />
+                    <ellipse cx="41" cy="86" rx="5" ry="3.5" fill="#c084fc" />
+                  </g>
+                  <g className={`origin-hip-r ${act === 'cardio' ? 'anim-run-leg-r' : ''}`}>
+                    <line x1="57" y1="65" x2="57" y2="85" stroke="#fcd5ce" strokeWidth="4.5" strokeLinecap="round" />
+                    <ellipse cx="59" cy="86" rx="5" ry="3.5" fill="#c084fc" />
+                  </g>
+
+                  <g className={`origin-shoulder-l ${act === 'cardio' ? 'anim-run-arm-l' : act === 'strength' ? 'anim-curl-l' : ''}`}>
+                    {act === 'stretch' ? (
+                      <line x1="45" y1="42" x2="35" y2="15" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" />
+                    ) : (
+                      <line x1="45" y1="42" x2={50 - bodyRx - 3} y2="58" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" className="transition-all duration-700 ease-out" />
+                    )}
+                    {act === 'strength' && (
+                      <g transform={`translate(${50 - bodyRx - 3}, 58)`}>
+                        <line x1="-4" y1="0" x2="4" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+                        <circle cx="-4" cy="0" r="3" fill="#ec4899" />
+                        <circle cx="4" cy="0" r="3" fill="#ec4899" />
+                      </g>
+                    )}
+                  </g>
+
+                  <path d={`M 41 38 L 59 38 L ${50 + bodyRx} 68 Q 50 72 ${50 - bodyRx} 68 Z`} fill="#a855f7" className="transition-all duration-700 ease-out" />
+                  <path d={`M ${50 - bodyRx*0.65} 48 Q 50 51 ${50 + bodyRx*0.65} 48`} fill="none" stroke="#7e22ce" strokeWidth="2.5" strokeLinecap="round" className="transition-all duration-700 ease-out" />
+
+                  <g className={`origin-shoulder-r ${act === 'cardio' ? 'anim-run-arm-r' : act === 'strength' ? 'anim-curl-r' : ''}`}>
+                    {act === 'stretch' ? (
+                      <line x1="55" y1="42" x2="65" y2="15" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" />
+                    ) : (
+                      <line x1="55" y1="42" x2={50 + bodyRx + 3} y2="58" stroke="#fcd5ce" strokeWidth="4" strokeLinecap="round" className="transition-all duration-700 ease-out" />
+                    )}
+                    {act === 'strength' && (
+                      <g transform={`translate(${50 + bodyRx + 3}, 58)`}>
+                        <line x1="-4" y1="0" x2="4" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+                        <circle cx="-4" cy="0" r="3" fill="#ec4899" />
+                        <circle cx="4" cy="0" r="3" fill="#ec4899" />
+                      </g>
+                    )}
+                  </g>
+
+                  <circle cx="50" cy={faceY} r="14" fill="#fcd5ce" />
+                  <path d="M 35 25 Q 50 5 65 25 Q 50 15 35 25" fill="#3f271d" />
+                  <path d="M 36 28 Q 40 18 52 18 Q 45 22 36 28" fill="#5c3a21" />
                   
-                  return (
-                  <div 
-                    key={idx}
-                    onClick={() => toggleExercise(idx)} 
-                    className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${isDone ? 'bg-white shadow-sm border border-slate-100 opacity-60' : 'bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1'}`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isDone ? 'bg-emerald-100 text-emerald-500' : 'bg-slate-50 text-slate-400'}`}>
-                        <span className="font-black text-sm">{idx + 1}</span>
+                  <path d="M 62 10 L 68 5 L 67 14 Z" fill="#e879f9" />
+                  <path d="M 62 10 L 56 5 L 57 14 Z" fill="#e879f9" />
+                  <circle cx="62" cy="10" r="2.5" fill="#d946ef" />
+
+                  <circle cx="42" cy={faceY + 4} r="3" fill="#ffa6c9" opacity="0.8" />
+                  <circle cx="58" cy={faceY + 4} r="3" fill="#ffa6c9" opacity="0.8" />
+
+                  {act === 'strength' || act === 'cardio' ? (
+                     <g>
+                        <path d="M 42 27 Q 44 26 46 27" fill="none" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" />
+                        <path d="M 54 27 Q 56 26 58 27" fill="none" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" />
+                     </g>
+                  ) : (
+                     <g>
+                        <circle cx="44" cy={faceY + 1} r="2.5" fill="#1e293b" />
+                        <circle cx="56" cy={faceY + 1} r="2.5" fill="#1e293b" />
+                        <circle cx="44.5" cy={faceY} r="1" fill="#ffffff" />
+                        <circle cx="56.5" cy={faceY} r="1" fill="#ffffff" />
+                     </g>
+                  )}
+
+                  {act === 'strength' ? (
+                    <line x1="48" y1="32" x2="52" y2="32" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" />
+                  ) : act === 'cardio' ? (
+                    <circle cx="50" cy="32" r="1.5" fill="#7e22ce" />
+                  ) : (
+                    <path d="M 48 31 Q 50 33 52 31" fill="none" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" />
+                  )}
+
+                  {progress >= 1 && (
+                    <g>
+                      <path d="M 47 30 Q 50 35 53 30" fill="#a855f7" stroke="#7e22ce" strokeWidth="1" strokeLinecap="round" />
+                      <g className="text-yellow-400">
+                        <path d="M 28 15 L 30 20 L 35 22 L 30 24 L 28 29 L 26 24 L 21 22 L 26 20 Z" fill="currentColor" />
+                        <path d="M 75 45 L 76 48 L 79 49 L 76 50 L 75 53 L 74 50 L 71 49 L 74 48 Z" fill="currentColor" />
+                      </g>
+                    </g>
+                  )}
+                </g>
+              </svg>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [activeTab, setActiveTab] = useState('tracker'); 
+          const [weight, setWeight] = useState(52.0);
+          const [water, setWater] = useState(0);
+          
+          const [breakfastDone, setBreakfastDone] = useState(false);
+          const [lunchDone, setLunchDone] = useState(false);
+          const [snackDone, setSnackDone] = useState(false);
+          const [dinnerDone, setDinnerDone] = useState(false);
+          const [exerciseChecks, setExerciseChecks] = useState([false, false, false, false]);
+          const [fastingSuccess, setFastingSuccess] = useState(false);
+          const [kneePain, setKneePain] = useState(null); 
+          
+          const [showConfetti, setShowConfetti] = useState(false);
+
+          const targetWater = 8;
+          const targetWeight = 45.0;
+          const initialWeight = 52.0;
+
+          const today = new Date();
+          const dayIndex = today.getDay(); 
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          const dateString = today.toLocaleDateString('th-TH', options);
+
+          const planStartDate = new Date(2026, 4, 27); 
+          const diffTime = today.getTime() - planStartDate.getTime();
+          const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1); 
+          const totalDays = 60; 
+          const overallProgress = Math.min(Math.round((diffDays / totalDays) * 100), 100);
+
+          const weighInFrequency = 7; 
+          const currentCycleDay = diffDays > 0 ? (diffDays - 1) % weighInFrequency : 0;
+          const isWeighInDay = currentCycleDay === 0 && diffDays > 0;
+          const daysUntilNextWeighIn = diffDays > 0 ? weighInFrequency - currentCycleDay : Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+          
+          const nextWeighInDate = new Date(today);
+          if (diffDays <= 0) {
+              nextWeighInDate.setTime(planStartDate.getTime());
+          } else if (!isWeighInDay) {
+              nextWeighInDate.setDate(today.getDate() + daysUntilNextWeighIn);
+          }
+          const nextWeighInString = nextWeighInDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+
+          const toggleExercise = (index) => {
+            const newChecks = [...exerciseChecks];
+            newChecks[index] = !newChecks[index];
+            setExerciseChecks(newChecks);
+          };
+
+          let dailyScore = 0;
+          if (breakfastDone) dailyScore += 10;
+          if (lunchDone) dailyScore += 10;
+          if (snackDone) dailyScore += 10;
+          if (dinnerDone) dailyScore += 10;
+          if (water >= targetWater) dailyScore += 20;
+          
+          const completedExercises = exerciseChecks.filter(Boolean).length;
+          dailyScore += (completedExercises / 4) * 20;
+          if (fastingSuccess) dailyScore += 20;
+          dailyScore = Math.min(Math.round(dailyScore), 100);
+
+          useEffect(() => {
+            if (dailyScore === 100) {
+              setShowConfetti(true);
+              const timer = setTimeout(() => setShowConfetti(false), 5000);
+              return () => clearTimeout(timer);
+            } else {
+              setShowConfetti(false);
+            }
+          }, [dailyScore]);
+
+          const getMotivationalMessage = () => {
+            if (dailyScore === 100) return "ภารกิจสำเร็จ! เลื่อนลงไปรับรางวัลด้านล่างเลย 🎁";
+            if (dailyScore >= 70) return "ใกล้ได้รางวัลแล้ว อย่าเพิ่งยอมแพ้! 💪";
+            if (dailyScore >= 40) return "มาถูกทางแล้ว ลุยต่อเลย! 🏃‍♀️";
+            return "พร้อมรับความท้าทายของวันนี้หรือยัง? 🎯";
+          };
+
+          const rewardsList = [
+            "ส้มตำแซ่บๆ 1 จาน (สั่งลดหวาน/เค็มลงนิดนึงเพื่อสุขภาพ)",
+            "ทุเรียนพูเล็กๆ 1 พู (ให้พอชื่นใจ)",
+            "แซลมอนซาชิมิฟินๆ 1 ชุด",
+            "ก๋วยเตี๋ยวชามโปรด 1 ชาม (อร่อยได้แต่งดซดน้ำซุปเยอะน้า)",
+            "จิ้มจุ่มมื้อเย็นฟินๆ (เน้นผักและเนื้อสัตว์ไม่ติดมัน)",
+            "ผลไม้สดแช่เย็นฉ่ำๆ (แตงโม หรือ ชมพู่)",
+            "เมี่ยงปลาเผาตัวโตๆ (เน้นกินผักเยอะๆ)",
+            "เงาะ หรือ มะขามหวาน พอให้หายอยาก",
+            "อาหารอีสาน 1 อย่างที่อยากกิน (เช่น น้ำตกหมู หรือ ลาบ)",
+            "ฝรั่ง มะละกอ หรือ พุทรา กรอบๆ เย็นๆ"
+          ];
+          const todayReward = rewardsList[diffDays % rewardsList.length];
+
+          const dailyPlan = {
+            day: 'วันนี้',
+            type: 'Arm & Core Focus (Low-Impact)',
+            meals: {
+              breakfast: 'ไข่ต้ม 2 ฟอง + นมดีน่าดีไลท์ (สูตรน้ำตาลน้อย) หรือ นมโปรตีนสูง',
+              lunch: 'ข้าวไรซ์เบอร์รี่ (กล่อง) + อกไก่นุ่ม (ในร้านสะดวกซื้อ) + ผักสลัด 1 ซอง',
+              snack: 'แอปเปิ้ลหั่นชิ้น (เตรียมจากบ้าน) หรือ อัลมอนด์ 1 ซองเล็ก',
+              dinner: 'สลัดโรลปูอัด (ซื้อจากตลาด/ร้าน) + น้ำสลัดซีฟู้ด (แตะนิดหน่อย)'
+            },
+            exercises: [
+              'ชกมวยอากาศแบบเกร็งแขน (Arm Punches) (40 วินาที)',
+              'หมุนแขนเป็นวงกลมเล็กๆ เร็วๆ (Arm Circles) (40 วินาที)',
+              'วิดพื้นดันกำแพง (Wall Push-ups) (40 วินาที)',
+              'สะพานโค้ง (Glute Bridge) (40 วินาที)' 
+            ]
+          };
+
+          const convenienceStoreIdeas = [
+            { type: 'เช้า', item: 'แซนวิชโฮลวีตทูน่า + อเมริกาโน่ไม่หวาน' },
+            { type: 'เช้า', item: 'กล้วยหอม 1 ลูก + ไข่ตุ๋นคัพ' },
+            { type: 'เที่ยง', item: 'ข้าวกล้อง + ปลาซาบะย่าง (สูตรโซเดียมต่ำ)' },
+            { type: 'เที่ยง', item: 'เกี๊ยวกุ้งน้ำ (ไม่ซดน้ำซุป) + ไข่ต้ม 1 ฟอง' },
+            { type: 'ว่าง', item: 'กรีกโยเกิร์ต (รสธรรมชาติ) + ถั่วแระญี่ปุ่น' },
+            { type: 'เย็น', item: 'ยำวุ้นเส้น (สำเร็จรูป) + อกไก่ฉีก' },
+          ];
+
+          return (
+            <div className="min-h-screen bg-[#FDFBF7] text-slate-800 font-sans pb-24 selection:bg-purple-200">
+              {showConfetti && <Confetti />}
+
+              <header className="relative bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-500 p-6 pb-14 rounded-b-[40px] shadow-md overflow-hidden text-white">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl -translate-y-1/3 translate-x-1/4"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-black opacity-10 rounded-full blur-xl translate-y-1/3 -translate-x-1/4"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <p className="text-white/90 font-black text-[11px] tracking-[0.2em] uppercase mb-1 flex items-center gap-1.5">
+                        <Flame size={14} className="text-yellow-300" fill="currentColor"/> 
+                        Flexible Fit & Firm
+                      </p>
+                      <h1 className="text-4xl font-black tracking-tight leading-none mb-1 uppercase drop-shadow-md text-white">
+                        Project <span className="text-pink-300">45</span>
+                      </h1>
+                      <h2 className="text-lg font-bold text-white/90 tracking-wide mt-1">
+                        Pattamapron's Challenge
+                      </h2>
+                    </div>
+                    <div className="bg-black/20 p-2.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20">
+                      <Target size={24} className="text-white"/>
+                    </div>
+                  </div>
+                  <p className="text-white/80 font-medium text-xs mt-3 flex items-center gap-1.5">
+                    <Calendar size={14} /> {dateString}
+                  </p>
+                </div>
+              </header>
+
+              <div className="px-5 -mt-10 relative z-20 space-y-4">
+                
+                <div className="bg-white rounded-[24px] p-5 shadow-xl shadow-purple-100/40 border border-purple-50 flex flex-col">
+                  <div className="mb-3">
+                    {isWeighInDay ? (
+                      <div className="bg-purple-50 text-purple-600 text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-purple-100 animate-pulse shadow-sm">
+                          <Scale size={14} /> วันนี้คือวันชั่งน้ำหนัก! อัปเดตตัวเลขเลย
                       </div>
-                      <div>
-                        <h3 className={`font-extrabold text-sm transition-all ${isDone ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>
-                          {title}
-                        </h3>
-                        <p className={`text-[11px] mt-0.5 font-medium ${isDone ? 'text-slate-400' : 'text-slate-500'}`}>
-                          {desc}
+                    ) : (
+                      <div className="bg-slate-50 text-slate-500 text-[10px] font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 border border-slate-100">
+                          <Scale size={12} /> ชั่งน้ำหนักครั้งต่อไปใน {daysUntilNextWeighIn} วัน ({nextWeighInString})
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-col z-10 shrink-0">
+                       <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                         <Target size={12} className="text-purple-500"/> เป้าหมาย: 45.0 กก.
+                       </span>
+                       <div className="flex items-baseline gap-1">
+                         <span className="text-4xl font-extrabold text-slate-800 tracking-tighter">{weight.toFixed(1)}</span>
+                         <span className="text-slate-500 font-bold">กก.</span>
+                       </div>
+                    </div>
+                    
+                    <div className="flex-1 flex justify-center">
+                       <TransformationAvatar weight={weight} targetWeight={targetWeight} initialWeight={initialWeight} dayIndex={dayIndex} />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 bg-slate-50 p-1.5 rounded-[16px] border border-slate-100 z-10 shrink-0">
+                       <button onClick={() => setWeight(prev => Number((prev + 0.1).toFixed(1)))} className="w-8 h-8 bg-white rounded-[10px] flex items-center justify-center text-slate-400 font-bold text-xl shadow-sm border border-slate-100 active:scale-95 transition-transform leading-none">+</button>
+                       <button onClick={() => setWeight(prev => Math.max(40, Number((prev - 0.1).toFixed(1))))} className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-[10px] flex items-center justify-center text-white font-bold text-xl shadow-md shadow-emerald-200 active:scale-95 transition-transform leading-none">-</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-[24px] p-5 shadow-lg shadow-purple-100/30 border border-slate-50">
+                   <div className="flex justify-between items-center mb-3">
+                     <div className="flex items-center gap-2">
+                       <Trophy size={18} className="text-amber-500" />
+                       <h3 className="font-bold text-slate-700 text-sm">ความสำเร็จของแคมเปญ</h3>
+                     </div>
+                     <span className="text-xs font-black text-slate-400">วันที่ {diffDays > 0 ? diffDays : '0'} / 60</span>
+                   </div>
+                   
+                   <div className="relative w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-2">
+                      <div 
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-400 via-fuchsia-500 to-purple-600 rounded-full transition-all duration-1000 ease-out" 
+                        style={{ width: `${overallProgress}%` }}
+                      ></div>
+                   </div>
+                   <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                     <span>Start</span>
+                     <span className="text-purple-500">{overallProgress}%</span>
+                     <span>Goal</span>
+                   </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center gap-3 mt-8 px-5">
+                <button 
+                  onClick={() => setActiveTab('tracker')}
+                  className={`flex-1 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'tracker' ? 'bg-slate-900 text-white shadow-xl shadow-slate-300 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
+                >
+                  <Flame size={18} className={activeTab === 'tracker' ? 'text-purple-400' : ''} />
+                  เช็คลิสต์วันนี้
+                </button>
+                <button 
+                  onClick={() => setActiveTab('plan')}
+                  className={`flex-1 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'plan' ? 'bg-slate-900 text-white shadow-xl shadow-slate-300 translate-y-[-2px]' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
+                >
+                  <BookOpen size={18} className={activeTab === 'plan' ? 'text-fuchsia-400' : ''} />
+                  แผนปฏิบัติการ
+                </button>
+              </div>
+
+              <main className="px-5 mt-6 space-y-6">
+                
+                {activeTab === 'tracker' ? (
+                  <>
+                    <section className={`rounded-[24px] p-6 shadow-sm border flex items-center justify-between relative overflow-hidden transition-colors duration-500 ${dailyScore === 100 ? 'bg-purple-500 border-purple-400 text-white' : 'bg-white border-slate-100 text-slate-800'}`}>
+                       <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full opacity-50 blur-xl ${dailyScore === 100 ? 'bg-purple-400' : 'bg-purple-50'}`}></div>
+                      <div className="relative z-10 max-w-[60%]">
+                        <h2 className={`font-extrabold text-lg mb-1 ${dailyScore === 100 ? 'text-white' : 'text-slate-800'}`}>พลังงานวันนี้</h2>
+                        <p className={`text-sm font-bold leading-snug ${dailyScore === 100 ? 'text-purple-100' : 'text-slate-500'}`}>
+                          {getMotivationalMessage()}
                         </p>
                       </div>
-                    </div>
-                    <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isDone ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200'}`}>
-                      {isDone && <CheckCircle size={14} className="stroke-[3] relative z-10" />}
-                    </div>
-                  </div>
-                )})}
-               </div>
-            </section>
-
-            {/* Fasting & Knee Pain */}
-            <section className="grid grid-cols-2 gap-4 my-6">
-              <div 
-                onClick={() => setFastingSuccess(!fastingSuccess)} 
-                className={`p-4 rounded-[24px] border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between active:scale-95 ${fastingSuccess ? 'border-indigo-500 bg-indigo-50' : 'border-transparent bg-white shadow-sm hover:-translate-y-1'}`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fastingSuccess ? 'bg-indigo-500 text-white shadow-md shadow-indigo-200' : 'bg-slate-100 text-slate-500'}`}>
-                    <Moon size={20} />
-                  </div>
-                  <div className={`relative w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${fastingSuccess ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-200'}`}>
-                    {fastingSuccess && <CheckCircle size={12} className="stroke-[3] relative z-10" />}
-                  </div>
-                </div>
-                <div>
-                  <h3 className={`font-extrabold text-sm ${fastingSuccess ? 'text-indigo-800' : 'text-slate-800'}`}>งดมื้อดึก (IF)</h3>
-                  <p className="text-[10px] text-slate-500 font-bold mt-1">20 Pts • หลัง 19:00 น.</p>
-                </div>
-              </div>
-
-              {/* Knee Pain Tracker */}
-              <div className="p-4 rounded-[24px] border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
-                 <h2 className="font-black text-xs text-slate-500 mb-2 uppercase flex items-center gap-1">
-                   <Activity size={12} className="text-purple-400"/> เช็คสภาพหัวเข่า
-                 </h2>
-                 <div className="flex justify-between gap-1 mt-auto">
-                    <button onClick={() => setKneePain('none')} className={`flex-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${kneePain === 'none' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                      <ThumbsUp size={16} />
-                      <span className="text-[9px] font-bold">ปกติ</span>
-                    </button>
-                    <button onClick={() => setKneePain('mild')} className={`flex-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${kneePain === 'mild' ? 'bg-yellow-400 text-yellow-900 shadow-md shadow-yellow-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                      <AlertCircle size={16} />
-                      <span className="text-[9px] font-bold">ตึงนิดๆ</span>
-                    </button>
-                 </div>
-              </div>
-            </section>
-          </>
-        ) : (
-          /* แท็บดูแผนการ (Plan Tab) */
-          <div className="space-y-6 animation-fade-in pb-10">
-            {/* เมนูอาหาร Timeline */}
-            <section className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <Utensils size={20} className="text-purple-500" />
-                  <h2 className="font-extrabold text-lg text-slate-800">แผนเสบียง: {dailyPlan.day}</h2>
-                </div>
-                <div className="bg-purple-50 text-purple-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wide">
-                  Convenience Mode
-                </div>
-              </div>
-              
-              <div className="space-y-6 relative ml-3">
-                 <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100 -z-10"></div>
-                 
-                {[
-                  { time: '10:00', meal: 'มื้อเช้า', desc: dailyPlan.meals.breakfast, icon: Coffee, color: 'bg-fuchsia-100 text-fuchsia-600', dot: 'border-fuchsia-400' },
-                  { time: '13:00', meal: 'มื้อเที่ยง', desc: dailyPlan.meals.lunch, icon: Sun, color: 'bg-purple-100 text-purple-600', dot: 'border-purple-400' },
-                  { time: '16:00', meal: 'มื้อว่าง', desc: dailyPlan.meals.snack, icon: Coffee, color: 'bg-violet-100 text-violet-600', dot: 'border-violet-400' },
-                  { time: '18:30', meal: 'มื้อเย็น', desc: dailyPlan.meals.dinner, icon: Sunset, color: 'bg-indigo-100 text-indigo-600', dot: 'border-indigo-400' }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4 items-start relative group">
-                    <div className={`w-8 h-8 rounded-full border-4 ${item.dot} bg-white flex items-center justify-center shrink-0 shadow-sm mt-1 -ml-1`}>
-                       <item.icon size={12} className="text-slate-400" />
-                    </div>
-                    <div className="bg-slate-50 p-4 rounded-[20px] flex-1 border border-transparent transition-colors shadow-sm">
-                      <div className="flex items-center gap-2 mb-1.5">
-                         <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${item.color}`}>{item.time}</span>
-                         <h3 className="font-extrabold text-slate-800 text-sm">{item.meal}</h3>
+                      <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
+                        <svg className="w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
+                          <path className={dailyScore === 100 ? 'text-purple-400' : 'text-slate-100'} strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          <path className={`transition-all duration-1000 ease-out ${dailyScore === 100 ? 'text-white' : 'text-purple-500'}`} strokeDasharray={`${dailyScore}, 100`} strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className={`text-xl font-extrabold ${dailyScore === 100 ? 'text-white' : 'text-slate-800'}`}>{dailyScore}</span>
+                        </div>
                       </div>
-                      <p className="text-sm font-medium text-slate-500 leading-snug">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </section>
 
-              {/* ไอเดียเมนูสลับเปลี่ยน */}
-              <div className="mt-6 pt-5 border-t border-slate-100">
-                <h3 className="font-bold text-slate-700 text-xs uppercase tracking-wide mb-3 flex items-center gap-1.5">
-                  <Star size={14} className="text-amber-500"/> ไอเดียเมนูร้านสะดวกซื้อ
-                </h3>
-                <div className="grid grid-cols-1 gap-2">
-                  {convenienceStoreIdeas.map((idea, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-50">
-                      <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">{idea.type}</span>
-                      {idea.item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
+                    <section className={`rounded-[24px] p-5 shadow-sm border transition-all duration-500 ${dailyScore === 100 ? 'bg-gradient-to-r from-fuchsia-50 to-purple-100 border-purple-200 scale-[1.02]' : 'bg-slate-50 border-slate-100'}`}>
+                       <div className="flex items-center gap-4">
+                         <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0 transition-all duration-500 ${dailyScore === 100 ? 'bg-purple-500 text-white shadow-lg shadow-purple-200' : 'bg-white text-slate-300 border border-slate-200'}`}>
+                           <Gift size={28} />
+                         </div>
+                         <div>
+                           <h3 className={`font-black text-sm uppercase tracking-wide ${dailyScore === 100 ? 'text-purple-800' : 'text-slate-400'}`}>
+                             {dailyScore === 100 ? '🎁 ปลดล็อกรางวัลคนเก่ง!' : 'ของรางวัลพิเศษรออยู่'}
+                           </h3>
+                           <p className={`text-xs mt-1.5 font-medium leading-relaxed ${dailyScore === 100 ? 'text-purple-700' : 'text-slate-500'}`}>
+                             {dailyScore === 100 
+                               ? `ยอดเยี่ยมมาก! วันนี้ได้สิทธิ์ทาน "${todayReward}" ให้รางวัลตัวเองเลยค่ะ 🎉`
+                               : 'ทำภารกิจทั้งหมดให้ครบ 100% เพื่อปลดล็อกอาหารของโปรดวันนี้!'}
+                           </p>
+                         </div>
+                       </div>
+                    </section>
 
-            {/* ท่าออกกำลังกาย */}
-            <section className="bg-slate-900 rounded-[24px] p-6 shadow-md border border-slate-800 mb-10 text-white relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500 opacity-20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4"></div>
-               
-               <div className="relative z-10">
-                 <div className="flex justify-between items-end mb-5">
-                   <div>
-                     <h2 className="font-black text-lg text-white flex items-center gap-2 tracking-wide uppercase">
-                       <Flame size={20} className="text-purple-400" />
-                       ตารางฝึกวันนี้
-                     </h2>
-                     <p className="text-xs font-bold text-emerald-400 mt-1 uppercase tracking-widest">{dailyPlan.type}</p>
-                   </div>
-                 </div>
-                
-                <div className="space-y-3">
-                  {dailyPlan.exercises.map((ex, idx) => {
-                    const isDone = exerciseChecks[idx];
-                    return (
-                    <div 
-                      key={idx} 
-                      onClick={() => toggleExercise(idx)}
-                      className={`flex items-center gap-3 p-3.5 rounded-[16px] border cursor-pointer transition-all ${isDone ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-white/10 border-white/5'}`}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shadow-md transition-colors ${isDone ? 'bg-emerald-500 text-white' : 'bg-purple-500 text-white'}`}>
-                        {isDone ? <CheckCircle size={16} strokeWidth={3} /> : idx + 1}
+                     <section>
+                       <h2 className="font-black text-slate-800 mb-3 px-1 flex items-center gap-2 uppercase tracking-wide text-sm">
+                         <Utensils size={18} className="text-purple-500"/>
+                         วินัยการกิน (40 Pts)
+                       </h2>
+                       <div className="grid gap-3">
+                        {[
+                          { state: breakfastDone, setter: setBreakfastDone, icon: Coffee, title: 'มื้อเช้า', time: '10:00', desc: dailyPlan.meals.breakfast, color: 'fuchsia' },
+                          { state: lunchDone, setter: setLunchDone, icon: Sun, title: 'มื้อเที่ยง', time: '13:00', desc: dailyPlan.meals.lunch, color: 'purple' },
+                          { state: snackDone, setter: setSnackDone, icon: Coffee, title: 'มื้อว่าง', time: '16:00', desc: dailyPlan.meals.snack, color: 'violet' },
+                          { state: dinnerDone, setter: setDinnerDone, icon: Sunset, title: 'มื้อเย็น', time: '18:30', desc: dailyPlan.meals.dinner, color: 'indigo' }
+                        ].map((meal, idx) => (
+                          <div 
+                            key={idx}
+                            onClick={() => meal.setter(!meal.state)} 
+                            className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${meal.state ? 'bg-white shadow-sm border border-slate-100 opacity-60' : 'bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1'}`}
+                          >
+                            <div className="flex items-center gap-3.5">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${meal.state ? `bg-${meal.color}-100 text-${meal.color}-500` : 'bg-slate-50 text-slate-400'}`}>
+                                <meal.icon size={20} />
+                              </div>
+                              <div>
+                                <h3 className={`font-extrabold text-sm transition-all ${meal.state ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>
+                                  {meal.title} <span className="text-[10px] font-bold text-slate-400 ml-1 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{meal.time}</span>
+                                </h3>
+                                <p className={`text-xs mt-1 line-clamp-1 font-medium ${meal.state ? 'text-slate-400' : 'text-slate-500'}`}>{meal.desc}</p>
+                              </div>
+                            </div>
+                            <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${meal.state ? `border-${meal.color}-500 bg-${meal.color}-500 text-white` : 'border-slate-200'}`}>
+                              {meal.state && <CheckCircle size={14} className="stroke-[3] relative z-10" />}
+                            </div>
+                          </div>
+                        ))}
+                       </div>
+                    </section>
+
+                    <section className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 relative overflow-hidden mt-6">
+                       <div 
+                         className="absolute bottom-0 left-0 right-0 bg-blue-50/60 transition-all duration-700 -z-0"
+                         style={{ height: `${Math.min((water/targetWater)*100, 100)}%` }}
+                       ></div>
+                       
+                       <div className="relative z-10">
+                         <div className="flex items-center gap-2 mb-4">
+                            <Droplet size={18} className="text-blue-500" />
+                            <h2 className="font-black text-slate-800 text-sm uppercase tracking-wide">เติมน้ำเข้าระบบ (20 Pts)</h2>
+                            <div className="ml-auto bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                              {water} / {targetWater} แก้ว
+                            </div>
+                          </div>
+                        
+                        <div className="flex items-center justify-center gap-6 mb-6">
+                          <button onClick={() => setWater(Math.max(0, water - 1))} className="w-12 h-12 rounded-[16px] bg-white border border-slate-200 flex items-center justify-center text-xl font-medium text-slate-500 active:scale-95 transition-transform">-</button>
+                          <div className="relative">
+                             <Droplet size={64} className={`${water >= targetWater ? 'text-blue-500' : 'text-slate-200'} transition-colors duration-500`} fill={water >= targetWater ? 'currentColor' : 'none'} strokeWidth={water >= targetWater ? 0 : 2} />
+                          </div>
+                          <button onClick={() => setWater(water + 1)} className="w-12 h-12 rounded-[16px] bg-blue-500 text-white flex items-center justify-center text-xl font-bold active:scale-95 shadow-lg shadow-blue-200 transition-transform">+</button>
+                        </div>
+                       </div>
+                    </section>
+
+                    <section className="mt-6">
+                       <div className="mb-3 px-1">
+                         <h2 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-wide text-sm">
+                           <Flame size={18} className="text-emerald-500"/>
+                           ตารางฝึกวันนี้ (20 Pts)
+                         </h2>
+                         <p className="text-xs text-emerald-600 font-bold mt-1">เป้าหมายพิเศษ: <span className="bg-emerald-100 px-1.5 py-0.5 rounded">ลดต้นแขน & หน้าท้อง</span></p>
+                       </div>
+                       
+                       <div className="grid gap-3">
+                        {dailyPlan.exercises.map((ex, idx) => {
+                          const isDone = exerciseChecks[idx];
+                          const parts = ex.split('(');
+                          const title = parts[0].trim();
+                          const desc = parts.length > 1 ? '(' + parts[1] : '';
+                          
+                          return (
+                          <div 
+                            key={idx}
+                            onClick={() => toggleExercise(idx)} 
+                            className={`p-4 rounded-[20px] cursor-pointer flex items-center justify-between transition-all duration-300 active:scale-95 ${isDone ? 'bg-white shadow-sm border border-slate-100 opacity-60' : 'bg-white shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1'}`}
+                          >
+                            <div className="flex items-center gap-3.5">
+                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isDone ? 'bg-emerald-100 text-emerald-500' : 'bg-slate-50 text-slate-400'}`}>
+                                <span className="font-black text-sm">{idx + 1}</span>
+                              </div>
+                              <div>
+                                <h3 className={`font-extrabold text-sm transition-all ${isDone ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800'}`}>
+                                  {title}
+                                </h3>
+                                <p className={`text-[11px] mt-0.5 font-medium ${isDone ? 'text-slate-400' : 'text-slate-500'}`}>
+                                  {desc}
+                                </p>
+                              </div>
+                            </div>
+                            <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isDone ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200'}`}>
+                              {isDone && <CheckCircle size={14} className="stroke-[3] relative z-10" />}
+                            </div>
+                          </div>
+                        )})}
+                       </div>
+                    </section>
+
+                    <section className="grid grid-cols-2 gap-4 my-6">
+                      <div 
+                        onClick={() => setFastingSuccess(!fastingSuccess)} 
+                        className={`p-4 rounded-[24px] border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between active:scale-95 ${fastingSuccess ? 'border-indigo-500 bg-indigo-50' : 'border-transparent bg-white shadow-sm hover:-translate-y-1'}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${fastingSuccess ? 'bg-indigo-500 text-white shadow-md shadow-indigo-200' : 'bg-slate-100 text-slate-500'}`}>
+                            <Moon size={20} />
+                          </div>
+                          <div className={`relative w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${fastingSuccess ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-200'}`}>
+                            {fastingSuccess && <CheckCircle size={12} className="stroke-[3] relative z-10" />}
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className={`font-extrabold text-sm ${fastingSuccess ? 'text-indigo-800' : 'text-slate-800'}`}>งดมื้อดึก (IF)</h3>
+                          <p className="text-[10px] text-slate-500 font-bold mt-1">20 Pts • หลัง 19:00 น.</p>
+                        </div>
                       </div>
-                      <span className={`text-sm font-bold transition-all ${isDone ? 'text-emerald-300 line-through decoration-emerald-500/50' : 'text-white/90'}`}>{ex}</span>
-                    </div>
-                  )})}
-                </div>
-                <div className="mt-5 p-4 bg-white/5 rounded-[16px] text-xs font-medium text-slate-300 flex items-start gap-3 border border-white/10 leading-relaxed">
-                  <AlertCircle size={18} className="shrink-0 text-purple-400 mt-0.5" />
-                  <p>ทำท่าละ 40 วินาที พัก 20 วินาที ทำวนให้ครบ 4 รอบ <strong className="text-white">ระวัง! หากเจ็บแปล๊บที่เข่าให้หยุดทำทันที</strong></p>
-                </div>
-              </div>
-            </section>
-          </div>
-        )}
-      </main>
-    </div>
-  );
-}
+
+                      <div className="p-4 rounded-[24px] border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
+                         <h2 className="font-black text-xs text-slate-500 mb-2 uppercase flex items-center gap-1">
+                           <Activity size={12} className="text-purple-400"/> เช็คสภาพหัวเข่า
+                         </h2>
+                         <div className="flex justify-between gap-1 mt-auto">
+                            <button onClick={() => setKneePain('none')} className={`flex-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${kneePain === 'none' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
+                              <ThumbsUp size={16} />
+                              <span className="text-[9px] font-bold">ปกติ</span>
+                            </button>
+                            <button onClick={() => setKneePain('mild')} className={`flex-1 py-2 rounded-xl flex flex-col items-center gap-1 transition-all duration-300 ${kneePain === 'mild' ? 'bg-yellow-400 text-yellow-900 shadow-md shadow-yellow-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
+                              <AlertCircle size={16} />
+                              <span className="text-[9px] font-bold">ตึงนิดๆ</span>
+                            </button>
+                         </div>
+                      </div>
+                    </section>
+                  </>
+                ) : (
+                  <div className="space-y-6 animation-fade-in pb-10">
+                    <section className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100">
+                      <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-2">
+                          <Utensils size={20} className="text-purple-500" />
+                          <h2 className="font-extrabold text-lg text-slate-800">แผนเสบียง: {dailyPlan.day}</h2>
+                        </div>
+                        <div className="bg-purple-50 text-purple-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wide">
+                          Convenience Mode
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-6 relative ml-3">
+                         <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100 -z-10"></div>
+                         
+                        {[
+                          { time: '10:00', meal: 'มื้อเช้า', desc: dailyPlan.meals.breakfast, icon: Coffee, color: 'bg-fuchsia-100 text-fuchsia-600', dot: 'border-fuchsia-400' },
+                          { time: '13:00', meal: 'มื้อเที่ยง', desc: dailyPlan.meals.lunch, icon: Sun, color: 'bg-purple-100 text-purple-600', dot: 'border-purple-400' },
+                          { time: '16:00', meal: 'มื้อว่าง', desc: dailyPlan.meals.snack, icon: Coffee, color: 'bg-violet-100 text-violet-600', dot: 'border-violet-400' },
+                          { time: '18:30', meal: 'มื้อเย็น', desc: dailyPlan.meals.dinner, icon: Sunset, color: 'bg-indigo-100 text-indigo-600', dot: 'border-indigo-400' }
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex gap-4 items-start relative group">
+                            <div className={`w-8 h-8 rounded-full border-4 ${item.dot} bg-white flex items-center justify-center shrink-0 shadow-sm mt-1 -ml-1`}>
+                               <item.icon size={12} className="text-slate-400" />
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-[20px] flex-1 border border-transparent transition-colors shadow-sm">
+                              <div className="flex items-center gap-2 mb-1.5">
+                                 <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${item.color}`}>{item.time}</span>
+                                 <h3 className="font-extrabold text-slate-800 text-sm">{item.meal}</h3>
+                              </div>
+                              <p className="text-sm font-medium text-slate-500 leading-snug">{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 pt-5 border-t border-slate-100">
+                        <h3 className="font-bold text-slate-700 text-xs uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                          <Star size={14} className="text-amber-500"/> ไอเดียเมนูร้านสะดวกซื้อ
+                        </h3>
+                        <div className="grid grid-cols-1 gap-2">
+                          {convenienceStoreIdeas.map((idea, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-[11px] text-slate-500 bg-white p-2 rounded-lg border border-slate-50">
+                              <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">{idea.type}</span>
+                              {idea.item}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="bg-slate-900 rounded-[24px] p-6 shadow-md border border-slate-800 mb-10 text-white relative overflow-hidden">
+                       <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500 opacity-20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4"></div>
+                       
+                       <div className="relative z-10">
+                         <div className="flex justify-between items-end mb-5">
+                           <div>
+                             <h2 className="font-black text-lg text-white flex items-center gap-2 tracking-wide uppercase">
+                               <Flame size={20} className="text-purple-400" />
+                               ตารางฝึกวันนี้
+                             </h2>
+                             <p className="text-xs font-bold text-emerald-400 mt-1 uppercase tracking-widest">{dailyPlan.type}</p>
+                           </div>
+                         </div>
+                        
+                        <div className="space-y-3">
+                          {dailyPlan.exercises.map((ex, idx) => {
+                            const isDone = exerciseChecks[idx];
+                            return (
+                            <div 
+                              key={idx} 
+                              onClick={() => toggleExercise(idx)}
+                              className={`flex items-center gap-3 p-3.5 rounded-[16px] border cursor-pointer transition-all ${isDone ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-white/10 border-white/5'}`}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shadow-md transition-colors ${isDone ? 'bg-emerald-500 text-white' : 'bg-purple-500 text-white'}`}>
+                                {isDone ? <CheckCircle size={16} strokeWidth={3} /> : idx + 1}
+                              </div>
+                              <span className={`text-sm font-bold transition-all ${isDone ? 'text-emerald-300 line-through decoration-emerald-500/50' : 'text-white/90'}`}>{ex}</span>
+                            </div>
+                          )})}
+                        </div>
+                        <div className="mt-5 p-4 bg-white/5 rounded-[16px] text-xs font-medium text-slate-300 flex items-start gap-3 border border-white/10 leading-relaxed">
+                          <AlertCircle size={18} className="shrink-0 text-purple-400 mt-0.5" />
+                          <p>ทำท่าละ 40 วินาที พัก 20 วินาที ทำวนให้ครบ 4 รอบ <strong className="text-white">ระวัง! หากเจ็บแปล๊บที่เข่าให้หยุดทำทันที</strong></p>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                )}
+              </main>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
